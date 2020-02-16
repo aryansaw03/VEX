@@ -57,7 +57,7 @@ static double y = .5;
 
 
 //Odometry Max
-static vec2 <double> pos (1.5,.5);
+static vec2d pos (0,0);
 static double theta = PI/2;
 static double prevL = 0;
 static double prevR = 0;
@@ -421,7 +421,7 @@ static void updateCoords2(){
 	//find current ecoder values
 	double currentL = degToFeet(leftEncoder.get());
 	double currentR = degToFeet(rightEncoder.get());
-	double currentH = degToFeet(horizontalEncoder.get());
+	double currentH = 0; //degToFeet(horizontalEncoder.get());
 	//find the change in encoder values
 	double changeL = prevL-currentL;
 	double changeR = prevR-currentR;
@@ -441,10 +441,16 @@ static void updateCoords2(){
 
 	// find the local offset
 	// chord forumla: 2sin(changeTheta/2) * radius
-	vec2 <double> localChangeInPos (radiusOfHorizontalArc, radiusOfTrackingCenterArc)
+	vec2d localTranslation (radiusOfHorizontalArc, radiusOfTrackingCenterArc)
 	localChangeInPos *= 2*std::sin(changeTheta/2);
 
+	// convert from local translation to global translation
+	localThetaOffset = theta + changeTheta/2;
+	globalTranslation = localTranslation.rotateAndReturn(-localThetaOffset);
 
+	// update position and theta
+	pos += globalTranslation;
+	theta += changeTheta;
 
 	//update previous encoder values
 	prevL = currentL;

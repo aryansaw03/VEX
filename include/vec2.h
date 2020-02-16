@@ -105,6 +105,14 @@ public:
 		y = ty;
 	}
 
+	void rotateAndReturn(double theta) {
+		double c = cos(theta);
+		double s = sin(theta);
+		double tx = x * c - y * s;
+		double ty = x * s + y * c;
+		return vec2 (tx,ty);
+	}
+
 	vec2& normalize() {
 		if (length() == 0) return *this;
 		*this *= (1.0 / length());
