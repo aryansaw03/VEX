@@ -105,12 +105,14 @@ public:
 		y = ty;
 	}
 
-	void rotateAndReturn(double theta) {
+	vec2& rotateAndReturn(double theta) {
 		double c = cos(theta);
 		double s = sin(theta);
 		double tx = x * c - y * s;
 		double ty = x * s + y * c;
-		return vec2 (tx,ty);
+		x = tx;
+		y = ty;
+		return *this;
 	}
 
 	vec2& normalize() {

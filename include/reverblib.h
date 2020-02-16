@@ -14,9 +14,9 @@ static Motor tray (TRAY, MOTOR_GEARSET_36, false, MOTOR_ENCODER_DEGREES);
 static Motor intakeRight (INTAKE_RIGHT, MOTOR_GEARSET_18, true, MOTOR_ENCODER_DEGREES);
 static Motor intakeLeft (INTAKE_LEFT, MOTOR_GEARSET_18, false, MOTOR_ENCODER_DEGREES);
 
-static ADIEncoder leftEncoder (1,2,false);
-static ADIEncoder rightEncoder (3,4,false);
-static ADIEncoder horizontalEncoder (5,6,false);
+static ADIEncoder leftEncoder ('C','D',false);
+static ADIEncoder rightEncoder ('E','F',false);
+static ADIEncoder horizontalEncoder ('G','H',false);
 
 //Autonomi
 static int autonomousType = -1;
@@ -353,40 +353,40 @@ static double calcHeading(double targetX, double targetY){
 	return std::atan(dy/dx);
 }
 
-static void updateCoords(double prevRight, double prevLeft){
-	double dRight = 69 - prevRight; //TODO: change to passive wheel input
-	double dLeft = 69 - prevLeft; //TODO: change to passive wheel input
-	double dRightFeet = degToFeet(dRight);
-	double dLeftFeet = degToFeet(dLeft);
-	double dCenterFeet = (dLeftFeet+dRightFeet)/2;
-	x += dCenterFeet*std::cos(theta);
-	y += dCenterFeet*std::sin(theta);
-	theta += (dRightFeet-dLeftFeet)/DISTANCE_BETWEEN_WHEELS;
-}
-
-static void turnToHeadingPD(double heading, double pGain, double dGain, double maxVelocity){
-	double prevHeadingError = heading-theta;
-	double prevRight = 69; //TODO: change to passive wheel input
-	double prevLeft = 69; //TODO: change to passive wheel input
-	double headingError = 0;
-	while(true){
-		updateCoords(prevRight, prevLeft);
-		headingError = heading-theta; //Calculate Proportional
-		double headingSlope = (headingError-prevHeadingError)/20; //Calculate Derivative
-		double rawTurnVel = pGain*headingError+dGain*headingSlope; //Calculate raw velocity
-		double turnVel = (rawTurnVel > maxVelocity) ? maxVelocity : rawTurnVel; //Cap velocity
-		if(std::abs(headingError) < 0.2){ //if error less than .2 exit
-			brakeChassis(MOTOR_BRAKE_BRAKE);
-			return;
-		}
-		prevHeadingError = headingError;
-		prevRight = 69; //TODO: change to passive wheel input
-		prevLeft = 69; //TODO: change to passive wheel input
-		turnChassisVelocity(turnVel);
-		delay(20);
-	}
-}
-
+// static void updateCoords(double prevRight, double prevLeft){
+// 	double dRight = 69 - prevRight; //TODO: change to passive wheel input
+// 	double dLeft = 69 - prevLeft; //TODO: change to passive wheel input
+// 	double dRightFeet = degToFeet(dRight);
+// 	double dLeftFeet = degToFeet(dLeft);
+// 	double dCenterFeet = (dLeftFeet+dRightFeet)/2;
+// 	x += dCenterFeet*std::cos(theta);
+// 	y += dCenterFeet*std::sin(theta);
+// 	theta += (dRightFeet-dLeftFeet)/DISTANCE_BETWEEN_WHEELS;
+// }
+//
+// static void turnToHeadingPD(double heading, double pGain, double dGain, double maxVelocity){
+// 	double prevHeadingError = heading-theta;
+// 	double prevRight = 69; //TODO: change to passive wheel input
+// 	double prevLeft = 69; //TODO: change to passive wheel input
+// 	double headingError = 0;
+// 	while(true){
+// 		updateCoords(prevRight, prevLeft);
+// 		headingError = heading-theta; //Calculate Proportional
+// 		double headingSlope = (headingError-prevHeadingError)/20; //Calculate Derivative
+// 		double rawTurnVel = pGain*headingError+dGain*headingSlope; //Calculate raw velocity
+// 		double turnVel = (rawTurnVel > maxVelocity) ? maxVelocity : rawTurnVel; //Cap velocity
+// 		if(std::abs(headingError) < 0.2){ //if error less than .2 exit
+// 			brakeChassis(MOTOR_BRAKE_BRAKE);
+// 			return;
+// 		}
+// 		prevHeadingError = headingError;
+// 		prevRight = 69; //TODO: change to passive wheel input
+// 		prevLeft = 69; //TODO: change to passive wheel input
+// 		turnChassisVelocity(turnVel);
+// 		delay(20);
+// 	}
+// }
+//
 // static void moveToPositionPD(double targetX, double targetY, double pGain, double dGain){
 // 	double prevRightError = deg-chassisRightFront.get_position();
 // 	double prevLeftError = deg-chassisRightFront.get_position();
@@ -417,11 +417,11 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
 
 //Odometry max
 
-static void updateCoords2(){
-	//find current ecoder values
-	double currentL = degToFeet(leftEncoder.get());
-	double currentR = degToFeet(rightEncoder.get());
-	double currentH = 0; //degToFeet(horizontalEncoder.get());
+static void updatePosition(){
+	//find current encoder values
+	double currentL = degToFeet(leftEncoder.get_value());
+	double currentR = degToFeet(rightEncoder.get_value());
+	double currentH = 0; //degToFeet(horizontalEncoder.get_value());
 	//find the change in encoder values
 	double changeL = prevL-currentL;
 	double changeR = prevR-currentR;
@@ -441,12 +441,12 @@ static void updateCoords2(){
 
 	// find the local offset
 	// chord forumla: 2sin(changeTheta/2) * radius
-	vec2d localTranslation (radiusOfHorizontalArc, radiusOfTrackingCenterArc)
-	localChangeInPos *= 2*std::sin(changeTheta/2);
+	vec2d localTranslation (radiusOfHorizontalArc, radiusOfTrackingCenterArc);
+	localTranslation *= 2*std::sin(changeTheta/2);
 
 	// convert from local translation to global translation
-	localThetaOffset = theta + changeTheta/2;
-	globalTranslation = localTranslation.rotateAndReturn(-localThetaOffset);
+	double localThetaOffset = theta + changeTheta/2;
+	vec2d globalTranslation = localTranslation.rotateAndReturn(-localThetaOffset);
 
 	// update position and theta
 	pos += globalTranslation;

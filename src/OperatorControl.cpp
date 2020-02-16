@@ -25,6 +25,11 @@ void opcontrol(){
 	bool intakeBackward = false;
 
 	while (true){
+		//testing
+
+		printf("L%f R%f \n",leftEncoder.get_value(),rightEncoder.get_value());
+
+
 		//Display image on lcd
 		lcd::clear();
 
