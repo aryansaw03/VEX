@@ -1,6 +1,7 @@
 #ifndef reverblib
 #define reverblib
 #include "main.h"
+#include "vec2.h"
 
 static Controller master = (CONTROLLER_MASTER);
 static Controller partner = (CONTROLLER_PARTNER);
@@ -12,6 +13,10 @@ static Motor lift (LIFT, MOTOR_GEARSET_36, false, MOTOR_ENCODER_DEGREES);
 static Motor tray (TRAY, MOTOR_GEARSET_36, false, MOTOR_ENCODER_DEGREES);
 static Motor intakeRight (INTAKE_RIGHT, MOTOR_GEARSET_18, true, MOTOR_ENCODER_DEGREES);
 static Motor intakeLeft (INTAKE_LEFT, MOTOR_GEARSET_18, false, MOTOR_ENCODER_DEGREES);
+
+static ADIEncoder leftEncoder (1,2,false);
+static ADIEncoder rightEncoder (3,4,false);
+static ADIEncoder horizontalEncoder (5,6,false);
 
 //Autonomi
 static int autonomousType = -1;
@@ -48,8 +53,17 @@ static const double PI = 3.141593;
 //Odometry
 static double x = 1.5;
 static double y = .5;
-static double theta = 90.0;
-static const double DISTANCE_BETWEEN_WHEELS = 9.0;
+//static double theta = 90.0;
+
+
+//Odometry Max
+static vec2 <double> pos (1.5,.5);
+static double theta = PI/2;
+static double prevL = 0;
+static double prevR = 0;
+static double prevH = 0;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 8.0;
+static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.0; //TODO measure actual value
 
 static double feetToDeg(double feet){
 	double circ = (1.0/12.0)*WHEEL_DIAMETER*PI;
@@ -400,5 +414,42 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
 // 		delay(20);
 // 	}
 // }
+
+//Odometry max
+
+static void updateCoords2(){
+	//find current ecoder values
+	double currentL = degToFeet(leftEncoder.get());
+	double currentR = degToFeet(rightEncoder.get());
+	double currentH = degToFeet(horizontalEncoder.get());
+	//find the change in encoder values
+	double changeL = prevL-currentL;
+	double changeR = prevR-currentR;
+	double changeH = prevL-currentH;
+
+	//from pilons
+	double changeTheta = (changeL-changeR)/DISTANCE_BETWEEN_TRACKING_WHEELS;
+
+	//to avoid division by 0
+	if(changeTheta == 0.0) changeTheta = 0.00000001;
+
+	//from pilons
+	double radiusOfTrackingCenterArc = changeR/changeTheta + DISTANCE_BETWEEN_TRACKING_WHEELS/2;
+
+	//from pilons
+	double radiusOfHorizontalArc = changeH/changeTheta + DISTANCE_TO_HORIZONTAL_WHEEL;
+
+	// find the local offset
+	// chord forumla: 2sin(changeTheta/2) * radius
+	vec2 <double> localChangeInPos (radiusOfHorizontalArc, radiusOfTrackingCenterArc)
+	localChangeInPos *= 2*std::sin(changeTheta/2);
+
+
+
+	//update previous encoder values
+	prevL = currentL;
+	prevR = currentR;
+	prevH = currentH;
+}
 
 #endif

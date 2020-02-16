@@ -53,32 +53,30 @@ void opcontrol(){
 		//=======//
 		//Chassis//
 		//=======//
-		// bool sameSign = (rightVJoystick<0 && leftVJoystick<0) || (rightVJoystick>0 && leftVJoystick>0);
-		// int rightVel = rightVJoystick;
-		// int leftVel = leftVJoystick;
-		// if(sameSign && std::abs(rightVel - leftVel) < CHASSIS_SNAP_THRESHOLD){ //Snap chassis to same value if within threshold
-		// 	int avg = (int)((rightVel + leftVel)/2);
-		// 	rightVel=avg;
-		// 	leftVel=avg;
-		// }
-		// if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
-		// 	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
-		// 	moveChassisVelocity(ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
-		// }
-		// if(std::abs(rightVel)>5){
-		// 	moveChassisRightVoltage(rightVel);
-		// }
-		// else{
-		// 	brakeChassisRight(MOTOR_BRAKE_COAST);
-		// }
-		// if(std::abs(leftVel)>5){
-		// 	moveChassisLeftVoltage(leftVel);
-		// }
-		// else{
-		// 	brakeChassisLeft(MOTOR_BRAKE_COAST);
-		// }
-		moveChassisRightVoltage(rightVJoystick);
-		moveChassisLeftVoltage(leftVJoystick);
+		bool sameSign = (rightVJoystick<0 && leftVJoystick<0) || (rightVJoystick>0 && leftVJoystick>0);
+		int rightVel = rightVJoystick;
+		int leftVel = leftVJoystick;
+		if(sameSign && std::abs(rightVel - leftVel) < CHASSIS_SNAP_THRESHOLD){ //Snap chassis to same value if within threshold
+			int avg = (int)((rightVel + leftVel)/2);
+			rightVel=avg;
+			leftVel=avg;
+		}
+		if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
+			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
+			moveChassisVelocity(ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+		}
+		if(std::abs(rightVel)>5){
+			moveChassisRightVoltage(rightVel);
+		}
+		else{
+			brakeChassisRight(MOTOR_BRAKE_COAST);
+		}
+		if(std::abs(leftVel)>5){
+			moveChassisLeftVoltage(leftVel);
+		}
+		else{
+			brakeChassisLeft(MOTOR_BRAKE_COAST);
+		}
 		//====End Chassis====//
 
 
