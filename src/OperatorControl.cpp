@@ -92,20 +92,18 @@ void opcontrol(){
 		if(buttonL1){
 			moveTrayForDegreesPD_OC(TRAY_FORWARD_POSITION, getMaxVelocity(tray), 1, 30); //Move tray forward
 		}
-		else if(movingTrayBackward){
-			if(tray.get_position() < TRAY_BACK_POSITION+2){ //if close to down position
-				movingTrayBackward=false;
-				trayBrake(MOTOR_BRAKE_HOLD);
-			}
-			else{
-				moveTrayForDegreesPD_OC(TRAY_BACK_POSITION, getMaxVelocity(tray)*TRAY_DOWN_VELOCITY_PERCENT, 1, 0.1); //Move tray back
-			}
-		}
 		else if(buttonL2){
 			movingTrayBackward = true;
 		}
 		else{
 			trayBrake(MOTOR_BRAKE_HOLD);
+		}
+
+		if(movingTrayBackward){
+			moveTrayAbsolute(TRAY_BACK_POSITION, getMaxVelocity(tray));
+			if(tray.get_position() < TRAY_BACK_POSITION+2){
+				movingTrayBackward = false;
+			}
 		}
 		//====End Tray====//
 
@@ -142,8 +140,8 @@ void opcontrol(){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
 		}
-		else if(buttonL2){
-			if(tray.get_position() > 200 && tray.get_position() < 300){
+		else if(buttonL1){
+			if(tray.get_position() > 200 && tray.get_position() < 300){//TODO: change intake to right position of tray for autostack
 				runIntakeVelocity(getMaxVelocity(intakeLeft));
 			}
 			else if(tray.get_position() > 200 && tray.get_position() < 300){
@@ -151,6 +149,11 @@ void opcontrol(){
 			}
 			else{
 				intakeBrake(MOTOR_BRAKE_HOLD);
+			}
+		}
+		else if(buttonL2){
+			if(tray.get_position() < TRAY_FORWARD_POSITION-100){
+				runIntakeVelocity(-getMaxVelocity(intakeLeft));
 			}
 		}
 		else{

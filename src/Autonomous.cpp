@@ -33,6 +33,7 @@ void runCollectCubes(){
 void testAuton(){
 	turnToHeadingPD(degToRad(180),190, 35, getMaxVelocity(chassisLeftBack));
 }
+
 /**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -44,10 +45,11 @@ void testAuton(){
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
 void autonomous() {
 	testAuton();
 	return;
-	autonomousType = ONE_CUBE;
+	//autonomousType = ONE_CUBE;
 	switch (autonomousType) {
 		case -1:
 			runInAllAuton();
