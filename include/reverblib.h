@@ -23,54 +23,35 @@ static ADIEncoder horizontalEncoder('G', 'H', false);
 
 //Autonomi
 static int autonomousType = -1;
-static
-const int RED_PROTECTED = 0;
-static
-const int RED_UNPROTECTED = 1;
-static
-const int BLUE_PROTECTED = 2;
-static
-const int BLUE_UNPROTECTED = 3;
-static
-const int ONE_CUBE = 4;
-static
-const int COLLECT_CUBES = 5;
-static
-const int NUM_OF_AUTONOMI = 6;
+static const int RED_PROTECTED = 0;
+static const int RED_UNPROTECTED = 1;
+static const int BLUE_PROTECTED = 2;
+static const int BLUE_UNPROTECTED = 3;
+static const int ONE_CUBE = 4;
+static const int COLLECT_CUBES = 5;
+static const int NUM_OF_AUTONOMI = 6;
 
 //Chassis
-static
-const double WHEEL_DIAMETER = 4.0;
-static
-const double CHASSIS_SNAP_THRESHOLD = 25.0;
+static const double WHEEL_DIAMETER = 4.0;
+static const double CHASSIS_SNAP_THRESHOLD = 25.0;
 
 //Tray
-static
-const double TRAY_FORWARD_POSITION = 1000.0;
-static
-const double TRAY_BACK_POSITION = 0.0;
-static
-const double MINIMUM_TRAY_VELOCITY = 30.0;
-static
-const double TRAY_DOWN_VELOCITY_PERCENT = 0.6;
+static const double TRAY_FORWARD_POSITION = 1000.0;
+static const double TRAY_BACK_POSITION = 0.0;
+static const double MINIMUM_TRAY_VELOCITY = 30.0;
+static const double TRAY_DOWN_VELOCITY_PERCENT = 0.6;
 
 //Intake
-static
-const double INTAKE_REVERSE_SLOW_VELOCITY_PERCENT = 0.6;
-static
-const double INTAKE_REVERSE_FAST_VELOCITY_PERCENT = 1.0;
-static
-const double SPROCKET_DIAMETER = 2.0;
+static const double INTAKE_REVERSE_SLOW_VELOCITY_PERCENT = 0.6;
+static const double INTAKE_REVERSE_FAST_VELOCITY_PERCENT = 1.0;
+static const double SPROCKET_DIAMETER = 2.0;
 
 //Lift
-static
-const double LIFT_UP_POSITION = 770.0;
-static
-const double LIFT_DOWN_POSITION = 0.0;
+static const double LIFT_UP_POSITION = 770.0;
+static const double LIFT_DOWN_POSITION = 0.0;
 
 //General
-static
-const double PI = 3.141593;
+static const double PI = 3.141593;
 
 //Odometry
 static int DELAY_MS = 10;
@@ -81,12 +62,9 @@ static double theta = PI / 2;
 static double prevL = 0;
 static double prevR = 0;
 static double prevH = 0;
-static
-const double DISTANCE_BETWEEN_TRACKING_WHEELS = 8.125;
-static
-const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.0 / 12.0; //TODO measure actual value
-static
-const double SMALL_WHEEL_DIAMETER = 3.25;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 8.125;
+static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.0 / 12.0; //TODO measure actual value
+static const double SMALL_WHEEL_DIAMETER = 3.25;
 
 static double degToRad(double deg){
 	return deg*(PI/180);
