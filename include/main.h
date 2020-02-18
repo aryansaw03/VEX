@@ -1,10 +1,10 @@
 //Define Motor Ports
-#define RIGHT_FRONT_CHASSIS 19
-#define RIGHT_BACK_CHASSIS 20
-#define LEFT_FRONT_CHASSIS 12
-#define LEFT_BACK_CHASSIS 11
+#define RIGHT_FRONT_CHASSIS 18
+#define RIGHT_BACK_CHASSIS 17
+#define LEFT_FRONT_CHASSIS 15
+#define LEFT_BACK_CHASSIS 14
 #define LIFT 2
-#define TRAY 16
+#define TRAY 20
 #define INTAKE_LEFT 1
 #define INTAKE_RIGHT 10
 /**

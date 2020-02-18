@@ -30,6 +30,9 @@ void runCollectCubes(){
 	brakeChassis(MOTOR_BRAKE_HOLD);
 }
 
+void testAuton(){
+	turnToHeadingPD(degToRad(180),190, 35, getMaxVelocity(chassisLeftBack));
+}
 /**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -42,7 +45,9 @@ void runCollectCubes(){
  * from where it left off.
  */
 void autonomous() {
-	//autonomousType = ONE_CUBE;
+	testAuton();
+	return;
+	autonomousType = ONE_CUBE;
 	switch (autonomousType) {
 		case -1:
 			runInAllAuton();

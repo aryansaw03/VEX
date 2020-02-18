@@ -24,12 +24,13 @@ void opcontrol(){
 	bool intakeForward = false;
 	bool intakeBackward = false;
 
+	bool movingTrayBackward = false;
+
 	while (true){
 		//testing
-
-		printf("L%f R%f \n",leftEncoder.get_value(),rightEncoder.get_value());
-
-
+		//printf("%d     %d\n", rightEncoder.get_value(), leftEncoder.get_value());
+		updatePosition();
+		printf("%f     %f     %f\n", pos.x, pos.y, theta*180/PI);
 		//Display image on lcd
 		lcd::clear();
 
@@ -89,10 +90,19 @@ void opcontrol(){
 		//Tray//
 		//====//
 		if(buttonL1){
-			moveTrayForDegreesPD(TRAY_FORWARD_POSITION, getMaxVelocity(tray), 1, 0.1); //Move tray forward
+			moveTrayForDegreesPD_OC(TRAY_FORWARD_POSITION, getMaxVelocity(tray), 1, 30); //Move tray forward
+		}
+		else if(movingTrayBackward){
+			if(tray.get_position() < TRAY_BACK_POSITION+2){ //if close to down position
+				movingTrayBackward=false;
+				trayBrake(MOTOR_BRAKE_HOLD);
+			}
+			else{
+				moveTrayForDegreesPD_OC(TRAY_BACK_POSITION, getMaxVelocity(tray)*TRAY_DOWN_VELOCITY_PERCENT, 1, 0.1); //Move tray back
+			}
 		}
 		else if(buttonL2){
-			moveTrayAbsolute(TRAY_BACK_POSITION, getMaxVelocity(tray)*TRAY_DOWN_VELOCITY_PERCENT); //Move tray back
+			movingTrayBackward = true;
 		}
 		else{
 			trayBrake(MOTOR_BRAKE_HOLD);
