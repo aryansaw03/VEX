@@ -1,8 +1,8 @@
 #ifndef reverblib
 #define reverblib
-#include "main.h"
+#include "../include/main.h"
 
-#include "vec2.h"
+#include "../include/vec2.h"
 
 static Controller master = (CONTROLLER_MASTER);
 static Controller partner = (CONTROLLER_PARTNER);
