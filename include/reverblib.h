@@ -494,6 +494,7 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 			leftVelocity = moveVelocity;
 			rightVelocity = moveVelocity * (1.0 - correction);
 		}
+		//TODO exit condition
 
 		// update previous values
 		prevHeadingError = headingError;
