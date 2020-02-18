@@ -388,6 +388,11 @@ static double calcHeading(double targetX, double targetY) {
     return std::atan(dy / dx);
 }
 
+static double smallestAngle(double target){
+	double tempAngle = target - theta;
+	return std::atan2(std::sin(tempAngle), std::cos(tempAngle));
+}
+
 static void updatePosition() {
     //find current encoder values
     double currentL = degToInchSmall(leftEncoder.get_value());
@@ -436,7 +441,7 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
     double headingError = 0;
     while (true) {
         updatePosition();
-        headingError = heading - theta; //Calculate Proportional
+        headingError = smallestAngle(heading); //Calculate Proportional
         double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
         double rawTurnVel = pGain * headingError + dGain * headingSlope; //Calculate raw velocity
         double turnVel = (rawTurnVel > maxVelocity) ? maxVelocity : rawTurnVel; //Cap velocity
@@ -449,6 +454,28 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
         turnChassisVelocity(turnVel);
         delay(DELAY_MS);
     }
+}
+
+static void moveToPositionPD(double targetX, double targetY, double pGainTurn, double dGainTurn, double turnMaxVelocity, double pGainMove, double dGainMove, double moveMaxVelocity, double pGainCorrection, double dGainCorrection, double maxCorrection){
+	vec2d desiredPos(targetX,targetY);
+	double heading = calcHeading(targetX, targetY);
+	turnToHeadingPD(heading,pGainTurn,dGainTurn, turnMaxVelocity);
+
+	double prevHeadingError = heading - theta;
+    double headingError = 0;
+	while(true){
+		updatePosition();
+		double headingError = smallestAngle(heading); //Calculate Proportional
+        double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
+		// correction is a value -1 < x < 1;
+		// negative correction should correct by decreasing the speed of the left motors
+		// positive correction should correct by decreasing the speed of the right motors
+        double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
+		double correction = (rawCorrection > maxCorrection) ? maxCorrection : rawCorrection; // cap the correction
+
+		double locationError = desiredPos.dist(pos);
+
+	}
 }
 
 // static void moveToPositionPD(double targetX, double targetY, double pGain, double dGain) {
