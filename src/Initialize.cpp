@@ -1,5 +1,5 @@
-#include "../include/main.h"
-#include "../include/reverblib.h"
+#include "main.h"
+#include "reverblib.h"
 
 int scrollIndex = 0;
 std::string autonomi [NUM_OF_AUTONOMI] = {"Red Protected", "Red Unprotected", "Blue Protected", "Blue Unprotected", "One Cube", "Collect Cubes"};

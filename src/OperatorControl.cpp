@@ -1,5 +1,5 @@
-#include "../include/main.h"
-#include "../include/reverblib.h"
+#include "main.h"
+#include "reverblib.h"
 
 /**
  * Runs the operator control code. This function will be started in its own task

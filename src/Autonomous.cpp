@@ -1,5 +1,5 @@
-#include "../include/main.h"
-#include "../include/reverblib.h"
+#include "main.h"
+#include "reverblib.h"
 
 void runInAllAuton(){
 	trayFlipOut();
