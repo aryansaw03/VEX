@@ -461,20 +461,48 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 	double heading = calcHeading(targetX, targetY);
 	turnToHeadingPD(heading,pGainTurn,dGainTurn, turnMaxVelocity);
 
-	double prevHeadingError = heading - theta;
+	double prevHeadingError = 0;
     double headingError = 0;
+
+	double prevLocationError = 0;
+	double locationError = 0;
 	while(true){
 		updatePosition();
-		double headingError = smallestAngle(heading); //Calculate Proportional
-        double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
+
 		// correction is a value -1 < x < 1;
 		// negative correction should correct by decreasing the speed of the left motors
 		// positive correction should correct by decreasing the speed of the right motors
+		headingError = smallestAngle(heading); //Calculate Proportional
+        double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
         double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
+		// maxCorrection should be between 0 and 1
 		double correction = (rawCorrection > maxCorrection) ? maxCorrection : rawCorrection; // cap the correction
 
-		double locationError = desiredPos.dist(pos);
+		// for determining speed to move at
+		locationError = desiredPos.dist(pos); // Proportional
+		double locationSlope = (locationError - prevLocationError) / DELAY_S; // Derivative
+		double rawMoveVelocity = pGainMove * locationError + dGainMove * locationSlope;
+		double moveVelocity = (rawMoveVelocity > moveMaxVelocity) ? moveMaxVelocity : rawMoveVelocity; // cap move velocity
 
+		double leftVelocity;
+		double rightVelocity;
+		if(correction < 0){ //negative correction should correct by decreasing the speed of the left motors
+			leftVelocity = moveVelocity * (1.0 + correction); //descrease speed;
+			rightVelocity = moveVelocity;
+		}
+		else{ //positive correction should correct by decreasing the speed of the right motors
+			leftVelocity = moveVelocity;
+			rightVelocity = moveVelocity * (1.0 - correction);
+		}
+
+		// update previous values
+		prevHeadingError = headingError;
+		prevLocationError = locationError;
+
+		moveChassisLeftVelocity(leftVelocity);
+		moveChassisRightVelocity(rightVelocity);
+
+		delay(DELAY_MS);
 	}
 }
 
