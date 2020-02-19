@@ -446,7 +446,7 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
         double rawTurnVel = pGain * headingError + dGain * headingSlope; //Calculate raw velocity
         double turnVel = (rawTurnVel > maxVelocity) ? maxVelocity : rawTurnVel; //Cap velocity
 		printf("Heading: %f  Scaled Error: %f  Scaled Slope: %f  Turn Vel: %f\n", radToDeg(theta), pGain * headingError, dGain * headingSlope, turnVel);
-        if (std::abs(headingError) < .005 && std::abs(headingSlope) < .0001) { //if error less than .2 exit
+        if (std::abs(headingError) < .005 && std::abs(headingSlope) < .0001) { //if error less than certain amount, exit
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
         }
