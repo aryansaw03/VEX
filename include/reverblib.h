@@ -411,8 +411,6 @@ static void updatePosition() {
 
     //from pilons
     double radiusOfTrackingCenterArc = changeR / changeTheta + DISTANCE_BETWEEN_TRACKING_WHEELS / 2;
-    //double radiusOfTrackingCenterArc2 = changeL/changeTheta - DISTANCE_BETWEEN_TRACKING_WHEELS/2;
-    //printf("%f    %f\n",radiusOfTrackingCenterArc,radiusOfTrackingCenterArc2);
 
     //from pilons
     double radiusOfHorizontalArc = 0; //changeH/changeTheta + DISTANCE_TO_HORIZONTAL_WHEEL;
@@ -476,7 +474,14 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
         double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
         double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
 		// maxCorrection should be between 0 and 1
-		double correction = (rawCorrection > maxCorrection) ? maxCorrection : rawCorrection; // cap the correction
+		double correction;
+		// cap the correction
+		if(rawCorrection > maxCorrection){
+			correction = maxCorrection;
+		}
+		else if(rawCorrection < -maxCorrection){
+			correction = -maxCorrection;
+		}
 
 		// for determining speed to move at
 		locationError = desiredPos.dist(pos); // Proportional
@@ -494,6 +499,7 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 			leftVelocity = moveVelocity;
 			rightVelocity = moveVelocity * (1.0 - correction);
 		}
+		//exit condition
 		if (std::abs(locationError) < .005 && std::abs(locationSlope) < .0001) {
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
