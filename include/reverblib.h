@@ -14,8 +14,8 @@ static Motor tray(TRAY, MOTOR_GEARSET_36, true, MOTOR_ENCODER_DEGREES);
 static Motor intakeRight(INTAKE_RIGHT, MOTOR_GEARSET_18, true, MOTOR_ENCODER_DEGREES);
 static Motor intakeLeft(INTAKE_LEFT, MOTOR_GEARSET_18, false, MOTOR_ENCODER_DEGREES);
 
-static ADIEncoder leftEncoder('C', 'D', false);
-static ADIEncoder rightEncoder('E', 'F', false);
+static ADIEncoder leftEncoder('C', 'D', true);
+static ADIEncoder rightEncoder('E', 'F', true);
 static ADIEncoder horizontalEncoder('G', 'H', false);
 
 //ALL DIMENTIONS IN INCHES!!!
@@ -458,6 +458,7 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 	vec2d desiredPos(targetX,targetY);
 	double heading = calcHeading(targetX, targetY);
 	turnToHeadingPD(heading,pGainTurn,dGainTurn, turnMaxVelocity);
+	pros::delay(50);
 
 	double prevHeadingError = 0;
     double headingError = 0;
@@ -491,14 +492,15 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 
 		double leftVelocity;
 		double rightVelocity;
-		if(correction < 0){ //negative correction should correct by decreasing the speed of the left motors
-			leftVelocity = moveVelocity * (1.0 + correction); //descrease speed;
+		if(correction > 0){ //negative correction should correct by decreasing the speed of the left motors
+			leftVelocity = moveVelocity * (1.0 - correction); //descrease speed;
 			rightVelocity = moveVelocity;
 		}
 		else{ //positive correction should correct by decreasing the speed of the right motors
 			leftVelocity = moveVelocity;
-			rightVelocity = moveVelocity * (1.0 - correction);
+			rightVelocity = moveVelocity * (1.0 + correction);
 		}
+		printf("Heading: %f  locationError: %f  Scaled Slope: %f  Vel: %f\n", radToDeg(theta), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity);
 		//exit condition
 		if (std::abs(locationError) < .005 && std::abs(locationSlope) < .0001) {
             brakeChassis(MOTOR_BRAKE_BRAKE);
