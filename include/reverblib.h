@@ -61,7 +61,7 @@ static double theta = PI / 2;
 static double prevL = 0;
 static double prevR = 0;
 static double prevH = 0;
-static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 8.125;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 9.75;
 static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.0 / 12.0; //TODO measure actual value
 static const double SMALL_WHEEL_DIAMETER = 3.25;
 
