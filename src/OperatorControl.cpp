@@ -96,7 +96,7 @@ void opcontrol(){
 		//====//
 		if(buttonL1){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
-	        double rawTrayVel = 0.2 * trayError; //Calculate raw velocity
+	        double rawTrayVel = 0.1 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
 	        if (std::abs(trayError) < 1){
 	            trayBrake(MOTOR_BRAKE_HOLD);
