@@ -28,10 +28,11 @@ void opcontrol(){
 
 	while (true){
 		//testing
-		printf("%d     %d\n", rightEncoder.get_value(), leftEncoder.get_value());
+		//printf("%d     %d\n", rightEncoder.get_value(), leftEncoder.get_value());
 		updatePosition();
+		printf("X: %f  Y: %f  Heading: %f \n", pos.x, pos.y, radToDeg(theta));
 		//printf("%f     %f     %f\n", pos.x, pos.y, theta*180/PI);
-		printf("tray:%f\n", tray.get_position());
+		//printf("tray:%f\n", tray.get_position());
 		//Display image on lcd
 		lcd::clear();
 

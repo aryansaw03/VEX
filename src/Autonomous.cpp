@@ -31,7 +31,7 @@ void runCollectCubes(){
 }
 
 void testAuton(){
-	turnToHeadingPD(degToRad(270),120, 0, getMaxVelocity(chassisLeftBack));
+	turnToHeadingPD(degToRad(270),80, 0, getMaxVelocity(chassisLeftBack));
 
 	//  moveToPositionPD(24, 24, // targetX, targetY
 	// 	190, 35, 100, // pGainTurn, dGainTurn, turnMaxVelocity

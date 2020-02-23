@@ -57,14 +57,15 @@ static int DELAY_MS = 10;
 static double DELAY_S = DELAY_MS/1000.0;
 
 static vec2d pos(0, 0);
-static double theta = PI / 2;
-static double prevL = 0;
-static double prevR = 0;
-static double prevH = 0;
-static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 9.90;
+static double theta = PI / 2.0;
+static double prevL = 0.0;
+static double prevR = 0.0;
+static double prevH = 0.0;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 10.0;
 static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.5; //TODO measure actual value
 static const double SMALL_WHEEL_DIAMETER = 3.25;
-static const double MIN_TURN_SPEED = 5;
+static const double MIN_TURN_SPEED = 1.0;
+static const double MIN_MOVE_SPEED = 5.0;
 
 static double degToRad(double deg){
 	return deg*(PI/180);
@@ -402,7 +403,7 @@ static void updatePosition() {
     //find the change in encoder values
     double changeL = prevL - currentL;
     double changeR = prevR - currentR;
-    double changeH = prevL - currentH;
+    double changeH = prevH - currentH;
 
     //from pilons
     double changeTheta = (changeL - changeR) / DISTANCE_BETWEEN_TRACKING_WHEELS;
@@ -414,6 +415,7 @@ static void updatePosition() {
 
 		// convert from local translation to global translation
 	    double localThetaOffset = theta + changeTheta / 2;
+		//printf("%f    %f\n", localTranslation.x,localTranslation.y);
 	    globalTranslation = localTranslation.rotateAndReturn(-localThetaOffset);
 	}
 	else{ // calculate curves
@@ -450,30 +452,20 @@ static void turnToHeadingPD(double heading, double pGain, double dGain, double m
         headingError = smallestAngle(heading); //Calculate Proportional
         double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
         double rawTurnVel = pGain * headingError + dGain * headingSlope; //Calculate raw velocity
-		double turnVel;
-		if(rawTurnVel<0.0){ //negative
-			if(rawTurnVel>-MIN_TURN_SPEED){
-				turnVel = -MIN_TURN_SPEED;
-			}
-			else if(rawTurnVel < -maxVelocity){
-				turnVel = -maxVelocity;
-			}
-			else{
-				turnVel = rawTurnVel;
-			}
+		double turnVel = rawTurnVel;
+		if(turnVel > maxVelocity){
+			turnVel = maxVelocity;
 		}
-		else{//positive
-			if(rawTurnVel<MIN_TURN_SPEED){
-				turnVel = MIN_TURN_SPEED;
-			}
-			else if(rawTurnVel > maxVelocity){
-				turnVel = maxVelocity;
-			}
-			else{
-				turnVel = rawTurnVel;
-			}
+		if(turnVel < -maxVelocity){
+			turnVel = -maxVelocity;
 		}
-		printf("Heading: %f  Scaled Error: %f  Scaled Slope: %f  Turn Vel: %f\n", radToDeg(theta), pGain * headingError, dGain * headingSlope, turnVel);
+		if(turnVel < MIN_TURN_SPEED && turnVel > 0.0){
+			turnVel = MIN_TURN_SPEED;
+		}
+		if(turnVel > -MIN_TURN_SPEED && turnVel < 0.0){
+			turnVel = -MIN_TURN_SPEED;
+		}
+		printf("Heading: %f  Scaled Error: %f  Scaled Slope: %f  Raw Turn Vel: %f  Turn Vel: %f\n", radToDeg(theta), pGain * headingError, dGain * headingSlope, rawTurnVel, turnVel);
         if (std::abs(headingError) < .005 && std::abs(headingSlope) < .0001) { //if error less than certain amount, exit
             brakeChassis(MOTOR_BRAKE_BRAKE);
 			printf("STOOOOOPID");
@@ -518,6 +510,29 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 		double locationSlope = (locationError - prevLocationError) / DELAY_S; // Derivative
 		double rawMoveVelocity = pGainMove * locationError + dGainMove * locationSlope;
 		double moveVelocity = (rawMoveVelocity > moveMaxVelocity) ? moveMaxVelocity : rawMoveVelocity; // cap move velocity
+
+		if(rawMoveVelocity<0.0){ //negative
+			if(rawMoveVelocity>-MIN_MOVE_SPEED){
+				moveVelocity = -MIN_MOVE_SPEED;
+			}
+			else if(rawMoveVelocity < -moveMaxVelocity){
+				moveVelocity = -moveMaxVelocity;
+			}
+			else{
+				moveVelocity = rawMoveVelocity;
+			}
+		}
+		else{//positive
+			if(rawMoveVelocity<MIN_MOVE_SPEED){
+				moveVelocity = MIN_MOVE_SPEED;
+			}
+			else if(rawMoveVelocity > moveMaxVelocity){
+				moveVelocity = moveMaxVelocity;
+			}
+			else{
+				moveVelocity = rawMoveVelocity;
+			}
+		}
 
 		double leftVelocity;
 		double rightVelocity;
