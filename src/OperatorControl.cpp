@@ -71,9 +71,9 @@ void opcontrol(){
 		if(std::abs(rightVel)>5){
 			moveChassisRightVoltage(rightVel);
 		}
-		else if(buttonL2){// && tray.get_position() < TRAY_FORWARD_POSITION-100){
+		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
-			moveChassisVelocity(ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+			moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
 		}
 		else{
 			brakeChassisRight(MOTOR_BRAKE_COAST);
@@ -81,7 +81,7 @@ void opcontrol(){
 		if(std::abs(leftVel)>5){
 			moveChassisLeftVoltage(leftVel);
 		}
-		else if(buttonL2){// && tray.get_position() < TRAY_FORWARD_POSITION-100){
+		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 			moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
 		}
@@ -94,19 +94,19 @@ void opcontrol(){
 		//====//
 		//Tray//
 		//====//
+		if(buttonL2 && !movingTrayBackward){
+			movingTrayBackward = true;
+		}
+
 		if(buttonL1){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
-	        double rawTrayVel = 0.1 * trayError; //Calculate raw velocity
+	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
 	        if (std::abs(trayError) < 1){
 	            trayBrake(MOTOR_BRAKE_HOLD);
-	            return;
 	        }
-	        prevTrayError = trayError;
 	        moveTrayVelocity(trayVel);
-		}
-		else if(buttonL2){
-			movingTrayBackward = true;
+			movingTrayBackward = false;
 		}
 		else if(movingTrayBackward){
 			moveTrayAbsolute(TRAY_BACK_POSITION, getMaxVelocity(tray));
@@ -163,10 +163,8 @@ void opcontrol(){
 			// 	intakeBrake(MOTOR_BRAKE_HOLD);
 			// }
 		}
-		else if(buttonL2){
-			if(tray.get_position() < TRAY_FORWARD_POSITION){
-				runIntakeVelocity(-getMaxVelocity(intakeLeft));
-			}
+		else if(buttonL2  && tray.get_position() < TRAY_FORWARD_POSITION-100){
+			runIntakeVelocity(-getMaxVelocity(intakeLeft));
 		}
 		else{
 			intakeBrake(MOTOR_BRAKE_HOLD);
