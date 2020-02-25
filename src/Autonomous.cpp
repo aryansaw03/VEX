@@ -31,16 +31,22 @@ void runCollectCubes(){
 }
 
 void testAuton(){
-	turnToHeadingPD(degToRad(270),80, 0, getMaxVelocity(chassisLeftBack));
+	// turnToHeadingPD(degToRad(270),60, 5, 60);
+	// delay(50);
+	// turnToHeadingPD(degToRad(0),60, 5, 60);
 
 	//  moveToPositionPD(24, 24, // targetX, targetY
 	// 	190, 35, 100, // pGainTurn, dGainTurn, turnMaxVelocity
 	// 	5, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	0.1, 0.05, 0.4); // pGainCorrection, dGainCorrection, maxCorrection
 
-	// swingMoveToPositionPD(24, 24, // targetX, targetY
-	// 	10, 0, 50, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	0.1, 0.05, 0.5); // pGainCorrection, dGainCorrection, maxCorrection
+	swingMoveToPositionPD(0, 24, // targetX, targetY
+		10, 0, 50, // pGainMove, dGainMove, moveMaxVelocity,
+		0.05, 0, 0.8); // pGainCorrection, dGainCorrection, maxCorrection
+
+	// swingTurnToHeadingPD(degToRad(180), // targetHeading
+	// 	130, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	2, 0, 1.0); // pGainCorrection, dGainCorrection, maxCorrection
 }
 
 /**

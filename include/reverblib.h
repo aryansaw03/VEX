@@ -57,15 +57,18 @@ static int DELAY_MS = 10;
 static double DELAY_S = DELAY_MS/1000.0;
 
 static vec2d pos(0, 0);
-static double theta = PI / 2.0;
+static double theta = 0.0;
 static double prevL = 0.0;
 static double prevR = 0.0;
 static double prevH = 0.0;
-static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 10.0;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 9.7;
 static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.5; //TODO measure actual value
 static const double SMALL_WHEEL_DIAMETER = 3.25;
-static const double MIN_TURN_SPEED = 1.0;
+static const double MIN_TURN_SPEED = 2.0;
 static const double MIN_MOVE_SPEED = 5.0;
+static const double MIN_CORRECTION = 0.1;
+static const double MIN_SWING_TURN_CORRECTION = 1.0;
+static const double MIN_SWING_SPEED = 10.0;
 
 static double degToRad(double deg){
 	return deg*(PI/180);
@@ -444,6 +447,80 @@ static void updatePosition() {
     prevH = currentH;
 }
 
+static void swingTurnToHeadingPD(double targetHeading, double pGainMove, double dGainMove, double moveMaxVelocity, double pGainCorrection, double dGainCorrection, double maxCorrection){
+
+	double prevHeadingError = 0;
+    double headingError = 0;
+
+	while(true){
+		updatePosition();
+
+		// correction is a value -1 < x < 1;
+		// positive correction should correct by decreasing the speed of the left motors
+		// negative correction should correct by decreasing the speed of the right motors
+		headingError = smallestAngle(targetHeading); //Calculate Proportional
+        double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
+        double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
+		// maxCorrection should be between 0 and 1
+		double correction = rawCorrection;
+		// cap the correction
+		if(rawCorrection > maxCorrection){
+			correction = maxCorrection;
+		}
+		else if(rawCorrection < -maxCorrection){
+			correction = -maxCorrection;
+		}
+		else if (rawCorrection < MIN_SWING_TURN_CORRECTION && rawCorrection > 0.0){
+			correction = MIN_SWING_TURN_CORRECTION;
+		}
+		else if (rawCorrection > MIN_SWING_TURN_CORRECTION && rawCorrection < 0.0){
+			correction = -MIN_SWING_TURN_CORRECTION;
+		}
+
+		// for determining speed to move at
+		double rawMoveVelocity = pGainMove * headingError + dGainMove * headingSlope;
+		double moveVelocity = rawMoveVelocity;
+
+		if(rawMoveVelocity > moveMaxVelocity){
+			moveVelocity = moveMaxVelocity;
+		}
+		if(rawMoveVelocity < -moveMaxVelocity){
+			moveVelocity = -moveMaxVelocity;
+		}
+		if(rawMoveVelocity < MIN_SWING_SPEED && rawMoveVelocity > 0.0){
+			moveVelocity = MIN_SWING_SPEED;
+		}
+		if(rawMoveVelocity > -MIN_SWING_SPEED && rawMoveVelocity < 0.0){
+			moveVelocity = -MIN_SWING_SPEED;
+		}
+
+		double leftVelocity;
+		double rightVelocity;
+		if(correction > 0){ //positive correction should correct by decreasing the speed of the left motors
+			leftVelocity = moveVelocity * (1.0 - correction); //descrease speed;
+			rightVelocity = moveVelocity;
+		}
+		else{ //negative correction should correct by decreasing the speed of the right motors
+			leftVelocity = moveVelocity;
+			rightVelocity = moveVelocity * (1.0 + correction);
+		}
+		printf("X: %f  Y: %f  Heading: %f headingError %f  headingSlope: %f  rawCorrection: %f Vel: %f\n", pos.x, pos.y, radToDeg(theta), headingError, headingSlope, rawCorrection, rawMoveVelocity);
+		//exit condition
+		if (std::abs(headingError) < .005 && std::abs(headingSlope) < .0001) { //  && std::abs(locationSlope) < .1
+            brakeChassis(MOTOR_BRAKE_BRAKE);
+            return;
+        }
+
+		// update previous values
+		prevHeadingError = headingError;
+
+		moveChassisLeftVelocity(leftVelocity);
+		moveChassisRightVelocity(rightVelocity);
+
+		delay(DELAY_MS);
+	}
+}
+
 static void turnToHeadingPD(double heading, double pGain, double dGain, double maxVelocity) {
     double prevHeadingError = heading - theta;
     double headingError = 0;
@@ -489,6 +566,8 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 	while(true){
 		updatePosition();
 
+		heading = calcHeading(targetX, targetY);
+
 		// correction is a value -1 < x < 1;
 		// positive correction should correct by decreasing the speed of the left motors
 		// negative correction should correct by decreasing the speed of the right motors
@@ -496,7 +575,7 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
         double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
         double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
 		// maxCorrection should be between 0 and 1
-		double correction;
+		double correction = rawCorrection;
 		// cap the correction
 		if(rawCorrection > maxCorrection){
 			correction = maxCorrection;
@@ -507,9 +586,10 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 
 		// for determining speed to move at
 		locationError = desiredPos.dist(pos); // Proportional
+		//printf("d x:%f  d y:%f  X:%f  Y:%f,  dist:%f\n",desiredPos.x,desiredPos.y,pos.x,pos.y,locationError);
 		double locationSlope = (locationError - prevLocationError) / DELAY_S; // Derivative
 		double rawMoveVelocity = pGainMove * locationError + dGainMove * locationSlope;
-		double moveVelocity = (rawMoveVelocity > moveMaxVelocity) ? moveMaxVelocity : rawMoveVelocity; // cap move velocity
+		double moveVelocity = rawMoveVelocity;
 
 		if(rawMoveVelocity<0.0){ //negative
 			if(rawMoveVelocity>-MIN_MOVE_SPEED){
@@ -518,9 +598,6 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 			else if(rawMoveVelocity < -moveMaxVelocity){
 				moveVelocity = -moveMaxVelocity;
 			}
-			else{
-				moveVelocity = rawMoveVelocity;
-			}
 		}
 		else{//positive
 			if(rawMoveVelocity<MIN_MOVE_SPEED){
@@ -528,9 +605,6 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 			}
 			else if(rawMoveVelocity > moveMaxVelocity){
 				moveVelocity = moveMaxVelocity;
-			}
-			else{
-				moveVelocity = rawMoveVelocity;
 			}
 		}
 
@@ -546,7 +620,7 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 		}
 		printf("X: %f  Y: %f  Heading: %f  locationError: %f  Scaled Slope: %f  Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity, headingError, headingSlope, rawCorrection);
 		//exit condition
-		if (std::abs(locationError) < 1) { //  && std::abs(locationSlope) < .1
+		if (std::abs(locationError) < 3) { //  && std::abs(locationSlope) < .1
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
         }
