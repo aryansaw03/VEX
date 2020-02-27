@@ -31,7 +31,7 @@ void runCollectCubes(){
 }
 
 void testAuton(){
-	// turnToHeadingPD(degToRad(270),60, 5, 60);
+	//turnToHeadingPD(degToRad(270),60, 5, 60);
 	// delay(50);
 	// turnToHeadingPD(degToRad(0),60, 5, 60);
 
@@ -40,9 +40,10 @@ void testAuton(){
 	// 	5, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	0.1, 0.05, 0.4); // pGainCorrection, dGainCorrection, maxCorrection
 
-	swingMoveToPositionPD(0, 24, // targetX, targetY
-		10, 0, 50, // pGainMove, dGainMove, moveMaxVelocity,
-		0.05, 0, 0.8); // pGainCorrection, dGainCorrection, maxCorrection
+
+	swingMoveToPositionPD(20, 20, // targetX, targetY
+		30, 5, 50, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
 
 	// swingTurnToHeadingPD(degToRad(180), // targetHeading
 	// 	130, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,

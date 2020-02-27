@@ -57,7 +57,7 @@ static int DELAY_MS = 10;
 static double DELAY_S = DELAY_MS/1000.0;
 
 static vec2d pos(0, 0);
-static double theta = 0.0;
+static double theta = PI/2.0;
 static double prevL = 0.0;
 static double prevR = 0.0;
 static double prevH = 0.0;
@@ -66,9 +66,12 @@ static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.5; //TODO measure actual va
 static const double SMALL_WHEEL_DIAMETER = 3.25;
 static const double MIN_TURN_SPEED = 2.0;
 static const double MIN_MOVE_SPEED = 5.0;
-static const double MIN_CORRECTION = 0.1;
+
 static const double MIN_SWING_TURN_CORRECTION = 1.0;
 static const double MIN_SWING_SPEED = 10.0;
+
+static const double MIN_CORRECTION_UPPER = 0.1;
+static const double MIN_CORRECTION_LOWER = 0.01;
 
 static double degToRad(double deg){
 	return deg*(PI/180);
@@ -390,7 +393,11 @@ static void trayFlipOut() {
 static double calcHeading(double targetX, double targetY) {
     double dx = targetX - pos.x;
     double dy = targetY - pos.y;
-    return std::atan(dy / dx);
+
+	if(dx < 0.0){
+		return std::atan(dy / dx)+PI;
+	}
+	return std::atan(dy / dx);
 }
 
 static double smallestAngle(double target){
@@ -414,7 +421,7 @@ static void updatePosition() {
     vec2d globalTranslation;
 
     if (changeTheta == 0.0){ // moved straight
-		vec2d localTranslation(changeH, changeR);
+		vec2d localTranslation(changeR, changeH);
 
 		// convert from local translation to global translation
 	    double localThetaOffset = theta + changeTheta / 2;
@@ -430,15 +437,16 @@ static void updatePosition() {
 
 	    // find the local offset
 	    // chord forumla: 2sin(changeTheta/2) * radius
-	    vec2d localTranslation(radiusOfHorizontalArc, radiusOfTrackingCenterArc);
+	    vec2d localTranslation(radiusOfTrackingCenterArc, radiusOfHorizontalArc);
 	    localTranslation *= 2 * std::sin(changeTheta / 2);
 
 		// convert from local translation to global translation
 	    double localThetaOffset = theta + changeTheta / 2;
 	    globalTranslation = localTranslation.rotateAndReturn(-localThetaOffset);
 	}
+	globalTranslation.x = -globalTranslation.x;
     // update position and theta
-    pos -= globalTranslation;
+    pos += globalTranslation;
     theta += changeTheta;
 
     //update previous encoder values
@@ -618,9 +626,9 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 			leftVelocity = moveVelocity;
 			rightVelocity = moveVelocity * (1.0 + correction);
 		}
-		printf("X: %f  Y: %f  Heading: %f  locationError: %f  Scaled Slope: %f  Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity, headingError, headingSlope, rawCorrection);
+		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f  locationError: %f  Scaled Slope: %f  Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity, headingError, headingSlope, rawCorrection);
 		//exit condition
-		if (std::abs(locationError) < 3) { //  && std::abs(locationSlope) < .1
+		if (std::abs(locationError) < 1) { //  && std::abs(locationSlope) < .1
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
         }
