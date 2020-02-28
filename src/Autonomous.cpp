@@ -40,12 +40,27 @@ void testAuton(){
 	// 	5, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	0.1, 0.05, 0.4); // pGainCorrection, dGainCorrection, maxCorrection
 
-
-	swingMoveToPositionPD(20, 20, // targetX, targetY
-		30, 5, 50, // pGainMove, dGainMove, moveMaxVelocity,
+	swingMoveToPositionBackwardsPD(-20, -20, // targetX, targetY
+		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
 		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
 
-	// swingTurnToHeadingPD(degToRad(180), // targetHeading
+	swingMoveToPositionBackwardsPD(-20, 20, // targetX, targetY
+		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	swingMoveToPositionBackwardsPD(20, 20, // targetX, targetY
+		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	swingMoveToPositionBackwardsPD(20, -20, // targetX, targetY
+		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	//  moveToPositionPD(0, 0, // targetX, targetY
+	// 	70, 5, 100, // pGainTurn, dGainTurn, turnMaxVelocity
+	// 	30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	//turnToHeadingPD(degToRad(270),70, 5, 100);
+
 	// 	130, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	2, 0, 1.0); // pGainCorrection, dGainCorrection, maxCorrection
 }

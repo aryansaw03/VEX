@@ -400,8 +400,22 @@ static double calcHeading(double targetX, double targetY) {
 	return std::atan(dy / dx);
 }
 
+static double calcHeadingBackwards(double targetX, double targetY) {
+    double tempHeading = calcHeading(targetX, targetY) - PI;
+
+	if(tempHeading < -PI/2){
+		tempHeading += PI*2;
+	}
+	return tempHeading;
+}
+
 static double smallestAngle(double target){
 	double tempAngle = target - theta;
+	return std::atan2(std::sin(tempAngle), std::cos(tempAngle));
+}
+
+static double smallestAngleBackwards(double target){
+	double tempAngle = target - theta - PI;
 	return std::atan2(std::sin(tempAngle), std::cos(tempAngle));
 }
 
@@ -639,6 +653,88 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 
 		moveChassisLeftVelocity(leftVelocity);
 		moveChassisRightVelocity(rightVelocity);
+
+		delay(DELAY_MS);
+	}
+}
+
+static void swingMoveToPositionBackwardsPD(double targetX, double targetY, double pGainMove, double dGainMove, double moveMaxVelocity, double pGainCorrection, double dGainCorrection, double maxCorrection){
+	vec2d desiredPos(targetX,targetY);
+	double heading = calcHeading(targetX, targetY) - PI;
+
+	double prevHeadingError = 0;
+    double headingError = 0;
+
+	double prevLocationError = 0;
+	double locationError = 0;
+	while(true){
+		updatePosition();
+
+		heading = calcHeadingBackwards(targetX, targetY);
+
+		// correction is a value -1 < x < 1;
+		// positive correction should correct by decreasing the speed of the left motors
+		// negative correction should correct by decreasing the speed of the right motors
+		headingError = smallestAngle(heading); //Calculate Proportional
+        double headingSlope = (headingError - prevHeadingError) / DELAY_S; //Calculate Derivative
+        double rawCorrection = pGainCorrection * headingError + dGainCorrection * headingSlope; //Calculate correction value
+		// maxCorrection should be between 0 and 1
+		double correction = rawCorrection;
+		// cap the correction
+		if(rawCorrection > maxCorrection){
+			correction = maxCorrection;
+		}
+		else if(rawCorrection < -maxCorrection){
+			correction = -maxCorrection;
+		}
+
+		// for determining speed to move at
+		locationError = desiredPos.dist(pos); // Proportional
+		//printf("d x:%f  d y:%f  X:%f  Y:%f,  dist:%f\n",desiredPos.x,desiredPos.y,pos.x,pos.y,locationError);
+		double locationSlope = (locationError - prevLocationError) / DELAY_S; // Derivative
+		double rawMoveVelocity = pGainMove * locationError + dGainMove * locationSlope;
+		double moveVelocity = rawMoveVelocity;
+
+		if(rawMoveVelocity<0.0){ //negative
+			if(rawMoveVelocity>-MIN_MOVE_SPEED){
+				moveVelocity = -MIN_MOVE_SPEED;
+			}
+			else if(rawMoveVelocity < -moveMaxVelocity){
+				moveVelocity = -moveMaxVelocity;
+			}
+		}
+		else{//positive
+			if(rawMoveVelocity<MIN_MOVE_SPEED){
+				moveVelocity = MIN_MOVE_SPEED;
+			}
+			else if(rawMoveVelocity > moveMaxVelocity){
+				moveVelocity = moveMaxVelocity;
+			}
+		}
+
+		double leftVelocity;
+		double rightVelocity;
+		if(correction < 0){ //positive correction should correct by decreasing the speed of the left motors
+			leftVelocity = moveVelocity * (1.0 + correction); //descrease speed;
+			rightVelocity = moveVelocity;
+		}
+		else{ //negative correction should correct by decreasing the speed of the right motors
+			leftVelocity = moveVelocity;
+			rightVelocity = moveVelocity * (1.0 - correction);
+		}
+		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f  locationError: %f  Scaled Slope: %f  Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity, headingError, headingSlope, rawCorrection);
+		//exit condition
+		if (std::abs(locationError) < 1) { //  && std::abs(locationSlope) < .1
+            brakeChassis(MOTOR_BRAKE_BRAKE);
+            return;
+        }
+
+		// update previous values
+		prevHeadingError = headingError;
+		prevLocationError = locationError;
+
+		moveChassisLeftVelocity(-leftVelocity);
+		moveChassisRightVelocity(-rightVelocity);
 
 		delay(DELAY_MS);
 	}
