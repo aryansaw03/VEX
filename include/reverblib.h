@@ -61,10 +61,10 @@ static double theta = PI/2.0;
 static double prevL = 0.0;
 static double prevR = 0.0;
 static double prevH = 0.0;
-static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 9.7;
+static const double DISTANCE_BETWEEN_TRACKING_WHEELS = 9.8;
 static const double DISTANCE_TO_HORIZONTAL_WHEEL = 1.5; //TODO measure actual value
-static const double SMALL_WHEEL_DIAMETER = 3.25;
-static const double MIN_TURN_SPEED = 2.0;
+static const double SMALL_WHEEL_DIAMETER = 3.356;
+static const double MIN_TURN_SPEED = 5.0;
 static const double MIN_MOVE_SPEED = 5.0;
 
 static const double MIN_SWING_TURN_CORRECTION = 1.0;
@@ -310,6 +310,11 @@ static void runIntakeVelocity(std::int32_t velocity) {
     intakeRight.move_velocity(velocity);
 }
 
+static void moveIntakeRelative(double targetPosition, std::int32_t velocity){
+	intakeLeft.move_relative(targetPosition, velocity);
+	intakeRight.move_relative(targetPosition, velocity);
+}
+
 static void intakeBrake(motor_brake_mode_e_t brakeType) {
     intakeLeft.set_brake_mode(brakeType);
     intakeRight.set_brake_mode(brakeType);
@@ -334,40 +339,22 @@ static void trayBrake(motor_brake_mode_e_t brakeType) {
     tray.move_velocity(0);
 }
 
-static void moveTrayForDegreesPD(double targetDegrees, double maxVelocity, double pGain, double dGain) {
-    double prevTrayError = targetDegrees - tray.get_position();
-    double prevPos = tray.get_position();
+static void moveTrayForward() {
     double trayError = 0;
     while (true) {
-        trayError = targetDegrees - tray.get_position(); //Calculate Proportional
-        double traySlope = (trayError - prevTrayError) / DELAY_S; //Calculate Derivative
-        double rawTrayVel = pGain * trayError + dGain * traySlope; //Calculate raw velocity
-        double trayVel = (rawTrayVel > maxVelocity) ? maxVelocity : rawTrayVel; //Cap velocity
-        if (std::abs(trayError) < 0.2) { //if error less than .2 exit
+        trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
+        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
+        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
+		trayVel = (trayVel < 40) ? 40 : trayVel;
+        if (trayError < 1) { //if error less than .2 exit
             trayBrake(MOTOR_BRAKE_HOLD);
             return;
         }
-        prevTrayError = trayError;
         moveTrayVelocity(trayVel);
+
+
         delay(DELAY_MS);
     }
-}
-
-static void moveTrayForDegreesPD_OC(double targetDegrees, double maxVelocity, double pGain, double dGain) {
-    double prevTrayError = targetDegrees - tray.get_position();
-    double prevPos = tray.get_position();
-    double trayError = 0;
-    trayError = targetDegrees - tray.get_position(); //Calculate Proportional
-    double traySlope = (trayError - prevTrayError) / DELAY_S; //Calculate Derivative
-    double rawTrayVel = pGain * trayError + dGain * traySlope; //Calculate raw velocity
-    double trayVel = (rawTrayVel > maxVelocity) ? maxVelocity : rawTrayVel; //Cap velocity
-    if (std::abs(trayError) < 0.2) { //if error less than .2 exit
-        trayBrake(MOTOR_BRAKE_HOLD);
-        return;
-    }
-    prevTrayError = trayError;
-    moveTrayVelocity(trayVel);
-
 }
 
 static void moveLiftVelocity(std::int16_t velocity) {
@@ -383,10 +370,34 @@ static void liftBrake(motor_brake_mode_e_t brakeType) {
     lift.move_velocity(0);
 }
 
+static void moveOut(){
+	moveTrayAbsolute(TRAY_BACK_POSITION, getMaxVelocity(tray));
+	delay(200);
+	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
+	runIntakeVelocity(-getMaxVelocity(intakeLeft));
+	moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+	delay(2000);
+	runIntakeVelocity(0);
+	brakeChassis(MOTOR_BRAKE_BRAKE);
+}
+
+static void setUpCubeForStack(){
+	moveIntakeRelative(-100, 200);
+}
+
 static void trayFlipOut() {
     runIntakeVelocity(-getMaxVelocity(intakeRight));
+	lift.move_absolute(300, 200);
     delay(1000);
+	lift.move_absolute(0, 200);
     intakeBrake(MOTOR_BRAKE_HOLD);
+}
+
+static void stack(){
+	moveTrayForward();
+	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
+	delay(200);
+	moveOut();
 }
 
 //Odometry
@@ -423,7 +434,7 @@ static void updatePosition() {
     //find current encoder values
     double currentL = degToInchSmall(leftEncoder.get_value());
     double currentR = degToInchSmall(rightEncoder.get_value());
-    double currentH = 0; //degToInchSmall(horizontalEncoder.get_value());
+    double currentH = degToInchSmall(horizontalEncoder.get_value());
     //find the change in encoder values
     double changeL = prevL - currentL;
     double changeR = prevR - currentR;
@@ -447,7 +458,7 @@ static void updatePosition() {
 	    double radiusOfTrackingCenterArc = changeR / changeTheta + DISTANCE_BETWEEN_TRACKING_WHEELS / 2;
 
 	    //from pilons
-	    double radiusOfHorizontalArc = 0; //changeH/changeTheta + DISTANCE_TO_HORIZONTAL_WHEEL;
+	    double radiusOfHorizontalArc = 0;//changeH/changeTheta - DISTANCE_TO_HORIZONTAL_WHEEL;
 
 	    // find the local offset
 	    // chord forumla: 2sin(changeTheta/2) * radius
@@ -462,6 +473,8 @@ static void updatePosition() {
     // update position and theta
     pos += globalTranslation;
     theta += changeTheta;
+
+	//theta = std::fmod(theta,360.0);
 
     //update previous encoder values
     prevL = currentL;
@@ -640,7 +653,7 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 			leftVelocity = moveVelocity;
 			rightVelocity = moveVelocity * (1.0 + correction);
 		}
-		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f  locationError: %f  Scaled Slope: %f  Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), pGainMove * locationError, dGainMove * locationSlope, rawMoveVelocity, headingError, headingSlope, rawCorrection);
+		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f Vel: %f  headingError %f  headingSlope: %f  rawCorrection: %f \n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), rawMoveVelocity, headingError, headingSlope, rawCorrection);
 		//exit condition
 		if (std::abs(locationError) < 1) { //  && std::abs(locationSlope) < .1
             brakeChassis(MOTOR_BRAKE_BRAKE);
@@ -747,33 +760,5 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 
 	swingMoveToPositionPD(targetX, targetY, pGainMove, dGainMove, moveMaxVelocity, pGainCorrection, dGainCorrection, maxCorrection);
 }
-
-// static void moveToPositionPD(double targetX, double targetY, double pGain, double dGain) {
-//     double prevRightError = deg - chassisRightFront.get_position();
-//     double prevLeftError = deg - chassisRightFront.get_position();
-//     double rightError = 0;
-//     double leftError = 0;
-//     while (true) {
-//         double heading = calcHeading(targetX, targetY);
-//         turnToHeadingPD(heading, 1, 0.1, double maxVelocity)
-//         rightError = deg - chassisRightFront.get_position();
-//         leftError = deg - chassisLeftFront.get_position();
-//         double rightSlope = (rightError - prevRightError) / 20;
-//         double leftSlope = (leftError - prevLeftError) / 20;
-//         double rawRightVel = pGain * rightError + dGain * rightSlope;
-//         double rawLeftVel = pGain * leftError + dGain * leftSlope;
-//         double rightVel = (rawRightVel > getMaxVelocity(chassisRightFront)) ? getMaxVelocity(chassisRightFront) : rawRightVel;
-//         double leftVel = (rawLeftVel > getMaxVelocity(chassisLeftFront)) ? getMaxVelocity(chassisLeftFront) : rawLeftVel;
-//         if (std::abs(rightError) < 0.2 || std::abs(leftError) < 0.2) {
-//             brakeChassis(MOTOR_BRAKE_BRAKE);
-//             return;
-//         }
-//         prevRightError = rightError;
-//         prevLeftError = leftError;
-//         moveChassisRightVelocity(rightVel);
-//         moveChassisLeftVelocity(leftVel);
-//         delay(20);
-//     }
-// }
 
 # endif

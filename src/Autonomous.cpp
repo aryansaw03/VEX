@@ -39,26 +39,31 @@ void testAuton(){
 	// 	190, 35, 100, // pGainTurn, dGainTurn, turnMaxVelocity
 	// 	5, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	0.1, 0.05, 0.4); // pGainCorrection, dGainCorrection, maxCorrection
+	// trayFlipOut();
+	// return;
+	intakeBrake(MOTOR_BRAKE_HOLD);
+	setUpCubeForStack();
+	stack();
+	return;
 
-	swingMoveToPositionBackwardsPD(-20, -20, // targetX, targetY
-		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	// swingMoveToPositionPD(-20, 30, // targetX, targetY
+	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	//
+	// swingMoveToPositionPD(0, 30, // targetX, targetY
+	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	//
+	// swingMoveToPositionBackwardsPD(0, 0, // targetX, targetY
+	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
 
-	swingMoveToPositionBackwardsPD(-20, 20, // targetX, targetY
-		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-	swingMoveToPositionBackwardsPD(20, 20, // targetX, targetY
-		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-
-	swingMoveToPositionBackwardsPD(20, -20, // targetX, targetY
-		30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-	//  moveToPositionPD(0, 0, // targetX, targetY
+	//turnToHeadingPD(degToRad(90),50, 0, 90);
+	//moveToPositionPD(0, 0, // targetX, targetY
 	// 	70, 5, 100, // pGainTurn, dGainTurn, turnMaxVelocity
 	// 	30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
 	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-
+	printf("FINAL Y:%f\n", pos.y);
 	//turnToHeadingPD(degToRad(270),70, 5, 100);
 
 	// 	130, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,

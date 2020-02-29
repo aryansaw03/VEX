@@ -15,9 +15,12 @@
  * task, not resume it from where it left off.
  */
 void opcontrol(){
+	master.clear();
+
 	//=========//
 	//Variables//
 	//=========//
+	int count = 0;
 	int intakeToggleCycles = 0;
 	int intakeReverseVelocityToggleCycles = 0;
 	bool fastReverse = false;
@@ -35,7 +38,15 @@ void opcontrol(){
 		//printf("tray:%f\n", tray.get_position());
 		//Display image on lcd
 		lcd::clear();
-
+		if(count%9 == 0){
+			master.print(0, 0, "LF: %d  RF: %d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature());
+		}
+		else if(count%9 == 3){
+			master.print(1, 0, "LB: %d  RB: %d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature());
+		}
+		else if(count%9 == 6){
+			master.print(2, 0, "IL: %d  IR: %d", (int)intakeLeft.get_temperature(), (int)intakeRight.get_temperature());
+		}
 		//=================//
 		//Controller Inputs//
 		//=================//
@@ -103,10 +114,13 @@ void opcontrol(){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
 	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
-	        if (std::abs(trayError) < 1){
+			trayVel = (trayVel < 40) ? 40 : trayVel;
+	        if (trayError < 1) { //if error less than .2 exit
 	            trayBrake(MOTOR_BRAKE_HOLD);
 	        }
-	        moveTrayVelocity(trayVel);
+			else{
+	        	moveTrayVelocity(trayVel);
+			}
 			movingTrayBackward = false;
 		}
 		else if(movingTrayBackward){
@@ -153,17 +167,6 @@ void opcontrol(){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
 		}
-		else if(buttonL1){
-			// if(tray.get_position() > 200 && tray.get_position() < 300){//TODO: change intake to right position of tray for autostack
-			// 	runIntakeVelocity(getMaxVelocity(intakeLeft));
-			// }
-			// else if(tray.get_position() > 200 && tray.get_position() < 300){
-			// 	runIntakeVelocity(-getMaxVelocity(intakeLeft));
-			// }
-			// else{
-			// 	intakeBrake(MOTOR_BRAKE_HOLD);
-			// }
-		}
 		else if(buttonL2  && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			runIntakeVelocity(-getMaxVelocity(intakeLeft));
 		}
@@ -189,6 +192,7 @@ void opcontrol(){
 		}
 		//====End Lift====//
 
+		count++;
 		pros::delay(20);
 	}
 }
