@@ -1,73 +1,163 @@
 #include "main.h"
 #include "reverblib.h"
 
-void runInAllAuton(){
-	trayFlipOut();
-}
-
-void runRedProtected(){
-	runInAllAuton();
-}
-
-void runRedUnprotected(){
-	runInAllAuton();
-}
-
-void runBlueProtected(){
-	runInAllAuton();
-}
-
-void runOneCube(){
+void allSide1(){
 	moveChassisVoltageTime(127, 1000);
 	moveChassisVoltageTime(-127, 1000);
-	runInAllAuton();
 }
 
-void runCollectCubes(){
-	runInAllAuton();
+void blueUnprot5(){
+	//pos.y = 2.6;
+	trayFlipOut();
+	delayWithOdom(1000);
+
 	runIntake();
-	moveChassisForDistancePD(2, 1, 0.5);
-	brakeChassis(MOTOR_BRAKE_HOLD);
+	delay(50);
+	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
+	swingMoveToPositionPD(0, 36, // targetX, targetY
+		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	swingMoveToPositionBackwardsPD(13, 10, // targetX, targetY
+		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	moveToPositionPD(-1, 4.5, // targetX, targetY
+		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 60, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	moveForTimeOdom(50, 200);
+
+	delay(800);
+	intakeBrake(MOTOR_BRAKE_HOLD);
+	delay(300);
+	setUpCubeFor5Stack();
+	stack();
+}
+
+void redUnprot5(){
+	pos.y = 2.6;
+	trayFlipOut();
+	delayWithOdom(1000);
+
+	runIntake();
+	delay(50);
+	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
+	swingMoveToPositionPD(0, 36, // targetX, targetY
+		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	swingMoveToPositionBackwardsPD(-21, 8, // targetX, targetY
+		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+		0.35, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	moveToPositionPD(1, 3, // targetX, targetY
+		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.4, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	turnToHeadingPD(degToRad(-10),50, 0, 90);
+
+	moveForTimeOdom(50, 400);
+
+	delay(500);
+	intakeBrake(MOTOR_BRAKE_HOLD);
+	delay(300);
+	setUpCubeFor5Stack();
+	stack();
+}
+
+void blueUnprot7(){
+	trayFlipOut();
+	delayWithOdom(700);
+
+	runIntake();
+	delay(50);
+
+	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
+	swingMoveToPositionPD(0, 37, // targetX, targetY
+		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+	delayWithOdom(100);
+	swingMoveToPositionBackwardsPD(26.5, 9, // targetX, targetY
+		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 0.7); // pGainCorrection, dGainCorrection, maxCorrection
+
+	moveToPositionPD(26, 24, // targetX, targetY
+		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	double cornerX = -1;
+	double cornerY = 15;
+	double heading = calcHeading(cornerX, cornerY);
+	turnToHeadingPD(heading,40, 0, 90);
+
+	setUpCubeFor7Stack();
+	tray.move_relative((int)(TRAY_FORWARD_POSITION/3*2), 100);
+
+	swingMoveToPositionPD(cornerX, cornerY, // targetX, targetY
+		10, 0, 150, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	turnToHeadingPD(degToRad(235),40, 0, 90);
+}
+
+void redUnprot7(){
+
+}
+
+void blueUnprot9(){
+
+}
+
+void redUnprot9(){
+
+}
+
+void blueProt5(){
+
+}
+
+void redProt5(){
+
 }
 
 void testAuton(){
-	//turnToHeadingPD(degToRad(270),60, 5, 60);
-	// delay(50);
-	// turnToHeadingPD(degToRad(0),60, 5, 60);
-
-	//  moveToPositionPD(24, 24, // targetX, targetY
-	// 	190, 35, 100, // pGainTurn, dGainTurn, turnMaxVelocity
-	// 	5, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	0.1, 0.05, 0.4); // pGainCorrection, dGainCorrection, maxCorrection
-	// trayFlipOut();
-	// return;
-	intakeBrake(MOTOR_BRAKE_HOLD);
-	setUpCubeForStack();
-	stack();
+	trayFlipOut();
 	return;
+	trayFlipOutMove();
+	delayWithOdom(500);
 
-	// swingMoveToPositionPD(-20, 30, // targetX, targetY
-	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-	//
-	// swingMoveToPositionPD(0, 30, // targetX, targetY
-	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-	//
-	// swingMoveToPositionBackwardsPD(0, 0, // targetX, targetY
-	// 	20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+	runIntake();
+	delay(50);
+	swingMoveToPositionPD(0, 40, // targetX, targetY
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.2); // pGainCorrection, dGainCorrection, maxCorrection
+	printf("X: %f  Y: %f  Heading: %f \n", pos.x, pos.y, radToDeg(theta));
+}
 
-	//turnToHeadingPD(degToRad(90),50, 0, 90);
-	//moveToPositionPD(0, 0, // targetX, targetY
-	// 	70, 5, 100, // pGainTurn, dGainTurn, turnMaxVelocity
-	// 	30, 5, 100, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
-	printf("FINAL Y:%f\n", pos.y);
-	//turnToHeadingPD(degToRad(270),70, 5, 100);
+void exampleMethods(){
+	swingMoveToPositionPD(-20, 30, // targetX, targetY
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
 
-	// 	130, 0, 30, // pGainMove, dGainMove, moveMaxVelocity,
-	// 	2, 0, 1.0); // pGainCorrection, dGainCorrection, maxCorrection
+	swingMoveToPositionBackwardsPD(0, 0, // targetX, targetY
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	moveToPositionPD(-10, 6, // targetX, targetY
+		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+
+	turnToHeadingPD(degToRad(90),50, 0, 90);
+
+	setUpCubeFor5Stack();
+	stack();
+
+	trayFlipOut();
 }
 
 /**
@@ -83,27 +173,37 @@ void testAuton(){
  */
 
 void autonomous() {
-	testAuton();
-	return;
-	//autonomousType = ONE_CUBE;
+	// testAuton();
+	// return;
+	autonomousType = BLUE_UNPROT_7;
 	switch (autonomousType) {
 		case -1:
-			runInAllAuton();
+			trayFlipOut();
 			break;
-		case RED_PROTECTED:
-			runRedProtected();
+		case RED_UNPROT_5:
+			redUnprot5();
 			break;
-		case RED_UNPROTECTED:
-			runRedUnprotected();
+		case BLUE_UNPROT_5:
+			blueUnprot5();
 			break;
-		case BLUE_PROTECTED:
-			runBlueProtected();
+		case RED_UNPROT_7:
+			redUnprot7();
 			break;
-		case ONE_CUBE:
-			runOneCube();
+		case BLUE_UNPROT_7:
+			blueUnprot7();
 			break;
-		case COLLECT_CUBES:
-			runCollectCubes();
+		case RED_UNPROT_9:
+			redUnprot9();
 			break;
+		case BLUE_UNPROT_9:
+			blueUnprot9();
+			break;
+		case RED_PROT_5:
+			redProt5();
+			break;
+		case BLUE_PROT_5:
+			blueProt5();
+			break;
+
 	}
 }

@@ -114,7 +114,7 @@ void opcontrol(){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
 	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
-			trayVel = (trayVel < 40) ? 40 : trayVel;
+			trayVel = (trayVel < 30) ? 30 : trayVel;
 	        if (trayError < 1) { //if error less than .2 exit
 	            trayBrake(MOTOR_BRAKE_HOLD);
 	        }
