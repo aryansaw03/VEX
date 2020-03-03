@@ -38,9 +38,9 @@ static const double WHEEL_DIAMETER = 4.0;
 static const double CHASSIS_SNAP_THRESHOLD = 25.0;
 
 //Tray
-static const double TRAY_FORWARD_POSITION = 1080.0;
+static const double TRAY_FORWARD_POSITION = 1100.0;
 static const double TRAY_BACK_POSITION = 0.0;
-static const double MINIMUM_TRAY_VELOCITY = 30.0;
+static const double MINIMUM_TRAY_VELOCITY = 20.0;
 static const double TRAY_DOWN_VELOCITY_PERCENT = 0.6;
 
 //Intake

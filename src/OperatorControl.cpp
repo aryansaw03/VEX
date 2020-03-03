@@ -28,6 +28,8 @@ void opcontrol(){
 	bool intakeBackward = false;
 	bool movingTrayBackward = false;
 	double prevTrayError = 0;
+	bool stackSetUp = false;
+	double prevIntakeLeftPosition = -1;
 
 	while (true){
 		//testing
@@ -39,13 +41,13 @@ void opcontrol(){
 		//Display image on lcd
 		lcd::clear();
 		if(count%9 == 0){
-			master.print(0, 0, "LF: %d  RF: %d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature());
+			master.print(0, 0, "LF:%dRF:%dT:%d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature(), (int)tray.get_temperature());
 		}
 		else if(count%9 == 3){
-			master.print(1, 0, "LB: %d  RB: %d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature());
+			master.print(1, 0, "LB:%dRB:%dL:%d", (int)chassisLeftFront.get_temperature(), (int)chassisRightFront.get_temperature(), (int)lift.get_temperature());
 		}
 		else if(count%9 == 6){
-			master.print(2, 0, "IL: %d  IR: %d", (int)intakeLeft.get_temperature(), (int)intakeRight.get_temperature());
+			master.print(2, 0, "IL:%dIR:%d", (int)intakeLeft.get_temperature(), (int)intakeRight.get_temperature());
 		}
 		//=================//
 		//Controller Inputs//
@@ -85,7 +87,7 @@ void opcontrol(){
 		}
 		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
-			moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+			moveChassisRightVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
 		}
 		else{
 			brakeChassisRight(MOTOR_BRAKE_COAST);
@@ -95,7 +97,7 @@ void opcontrol(){
 		}
 		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
-			moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+			moveChassisLeftVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
 		}
 		else{
 			brakeChassisLeft(MOTOR_BRAKE_COAST);
@@ -108,9 +110,11 @@ void opcontrol(){
 		//====//
 		if(buttonL2 && !movingTrayBackward){
 			movingTrayBackward = true;
+			stackSetUp = false;
+			prevIntakeLeftPosition = -1;
 		}
 
-		if(buttonL1){
+		if(buttonL1 && stackSetUp){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
 	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
@@ -167,7 +171,16 @@ void opcontrol(){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
 		}
-		else if(buttonL2  && tray.get_position() < TRAY_FORWARD_POSITION-100){
+		else if(buttonL1 && !stackSetUp){
+			if(prevIntakeLeftPosition == -1){
+				prevIntakeLeftPosition = intakeLeft.get_position();
+			}
+			moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
+			if(intakeLeft.get_position() <= prevIntakeLeftPosition-50){
+				stackSetUp = true;
+			}
+		}
+		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			runIntakeVelocity(-getMaxVelocity(intakeLeft));
 		}
 		else{
