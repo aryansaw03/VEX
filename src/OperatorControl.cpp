@@ -82,22 +82,22 @@ void opcontrol(){
 			rightVel=avg;
 			leftVel=avg;
 		}
-		if(std::abs(rightVel)>5){
-			moveChassisRightVoltage(rightVel);
-		}
-		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
+		if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 			moveChassisRightVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+		}
+		else if(std::abs(rightVel)>5){
+			moveChassisRightVoltage(rightVel);
 		}
 		else{
 			brakeChassisRight(MOTOR_BRAKE_COAST);
 		}
-		if(std::abs(leftVel)>5){
-			moveChassisLeftVoltage(leftVel);
-		}
-		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
+		if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 			moveChassisLeftVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
+		}
+		else if(std::abs(leftVel)>5){
+			moveChassisLeftVoltage(leftVel);
 		}
 		else{
 			brakeChassisLeft(MOTOR_BRAKE_COAST);
@@ -110,15 +110,13 @@ void opcontrol(){
 		//====//
 		if(buttonL2 && !movingTrayBackward){
 			movingTrayBackward = true;
-			stackSetUp = false;
-			prevIntakeLeftPosition = -1;
+			intakeBrake(MOTOR_BRAKE_HOLD);
 		}
-
-		if(buttonL1 && stackSetUp){
+		if(buttonL1){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
 	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
-			trayVel = (trayVel < 40) ? 40 : trayVel;
+			trayVel = (trayVel < 20) ? 20 : trayVel;
 	        if (trayError < 1) { //if error less than .2 exit
 	            trayBrake(MOTOR_BRAKE_HOLD);
 	        }
@@ -134,7 +132,12 @@ void opcontrol(){
 			}
 		}
 		else{
-			trayBrake(MOTOR_BRAKE_HOLD);
+			if(tray.get_position() < 50){
+				trayBrake(MOTOR_BRAKE_COAST);
+			}
+			else{
+				trayBrake(MOTOR_BRAKE_HOLD);
+			}
 		}
 		//====End Tray====//
 
@@ -142,11 +145,6 @@ void opcontrol(){
 		//======//
 		//Intake//
 		//======//
-		if(buttonA && intakeReverseVelocityToggleCycles>20){ //Toggle roller outtake speeds between fast and slow
-			fastReverse = !fastReverse;
-			intakeReverseVelocityToggleCycles = 0;
-		}
-
 		if(buttonR1 && intakeToggleCycles>20) { //Toggle roller intake
 			intakeBackward = false;
 			intakeForward = !intakeForward;
@@ -155,6 +153,9 @@ void opcontrol(){
 		else if(buttonR2) { //Hold to run roller outtake
 			intakeForward = false;
 			intakeBackward = true;
+		}
+		else if(buttonA){
+			stackSetUp = true;
 		}
 		else{
 			intakeBackward = false;
@@ -171,17 +172,22 @@ void opcontrol(){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
 		}
-		else if(buttonL1 && !stackSetUp){
-			if(prevIntakeLeftPosition == -1){
-				prevIntakeLeftPosition = intakeLeft.get_position();
-			}
-			moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
-			if(intakeLeft.get_position() <= prevIntakeLeftPosition-50){
-				stackSetUp = true;
-			}
+		else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-500){
+			intakeBrake(MOTOR_BRAKE_COAST);
+			//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
 		}
 		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			runIntakeVelocity(-getMaxVelocity(intakeLeft));
+		}
+		else if(stackSetUp){
+			if(prevIntakeLeftPosition == -1){
+				prevIntakeLeftPosition = intakeLeft.get_position();
+			}
+			moveIntakeRelative(prevIntakeLeftPosition-50, getMaxVelocity(intakeLeft));
+			if(intakeLeft.get_position() <= prevIntakeLeftPosition-48){
+				prevIntakeLeftPosition = -1;
+				stackSetUp = false;
+			}
 		}
 		else{
 			intakeBrake(MOTOR_BRAKE_HOLD);

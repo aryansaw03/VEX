@@ -16,16 +16,19 @@ void blueUnprot5(){
 	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 	swingMoveToPositionPD(0, 36, // targetX, targetY
 		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	swingMoveToPositionBackwardsPD(13, 10, // targetX, targetY
 		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.3, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.3, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	moveToPositionPD(-1, 4.5, // targetX, targetY
 		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
 		20, 0, 60, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	moveForTimeOdom(50, 200);
 
@@ -46,16 +49,19 @@ void redUnprot5(){
 	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 	swingMoveToPositionPD(0, 36, // targetX, targetY
 		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	swingMoveToPositionBackwardsPD(-21, 8, // targetX, targetY
 		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.35, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.35, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	moveToPositionPD(1, 3, // targetX, targetY
 		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		0.4, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.4, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	turnToHeadingPD(degToRad(-10),50, 0, 90);
 
@@ -70,7 +76,7 @@ void redUnprot5(){
 
 void blueUnprot7(){
 	trayFlipOut();
-	delayWithOdom(700);
+	delayWithOdom(600);
 
 	runIntake();
 	delay(50);
@@ -78,38 +84,72 @@ void blueUnprot7(){
 	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 	swingMoveToPositionPD(0, 37, // targetX, targetY
 		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 	delayWithOdom(100);
-	swingMoveToPositionBackwardsPD(26.5, 9, // targetX, targetY
+	swingMoveToPositionBackwardsPD(26.3, 9, // targetX, targetY
 		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.3, 0, 0.7); // pGainCorrection, dGainCorrection, maxCorrection
+		0.3, 0, 0.7, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
-	moveToPositionPD(26, 24, // targetX, targetY
-		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
+	turnToHeadingPD(degToRad(95),50, 0, 90);
+
+	delay(100);
+	printf("%f\n", pos.x);
+	swingMoveToPositionPD(pos.x, 25.5, // targetX, targetY
 		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.4, 0, 0.5, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
 
-	double cornerX = -1;
-	double cornerY = 15;
+	double cornerX = 0;
+	double cornerY = 17;
 	double heading = calcHeading(cornerX, cornerY);
-	turnToHeadingPD(heading,40, 0, 90);
+	turnToHeadingPD(heading+degToRad(0),40, 0, 130);
 
 	setUpCubeFor7Stack();
-	tray.move_relative((int)(TRAY_FORWARD_POSITION/3*2), 100);
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.7), 100);
 
 	swingMoveToPositionPD(cornerX, cornerY, // targetX, targetY
 		10, 0, 150, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.1); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 0.16, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
-	turnToHeadingPD(degToRad(235),40, 0, 90);
+	turnToHeadingPD(degToRad(235),45, 0, 100);
+
+	moveForTimeOdom(70, 600);
+
+	moveIntakeRelative(-50, 200);
+
+	stack();
 }
 
 void redUnprot7(){
 
 }
 
-void blueUnprot9(){
-
+void blueUnprot6(){
+	trayFlipOut();
+	delay(700);
+	runIntake();
+	moveChassisRelative(inchToDeg(35), 80);
+	delay(2000);
+	pointTurnRelative(inchToDeg(1.5), 30);
+	delay(500);
+	moveChassisRelative(inchToDeg(10), 50);
+	delay(1200);
+	moveChassisRelative(-inchToDeg(4), 50);
+	delay(500);
+	pointTurnRelative(-inchToDeg(1.5), 30);
+	delay(700);
+	moveChassisRelative(-inchToDeg(15), 80);
+	delay(1000);
+	pointTurnRelative(-inchToDeg(11.5), 30);
+	delay(2000);
+	setUpCubeFor5Stack();
+	delay(500);
+	moveChassisVelocityTime(80, 700);
+	delay(500);
+	stack();
 }
 
 void redUnprot9(){
@@ -134,23 +174,27 @@ void testAuton(){
 	delay(50);
 	swingMoveToPositionPD(0, 40, // targetX, targetY
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.2); // pGainCorrection, dGainCorrection, maxCorrection
+		0.2, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 	printf("X: %f  Y: %f  Heading: %f \n", pos.x, pos.y, radToDeg(theta));
 }
 
 void exampleMethods(){
 	swingMoveToPositionPD(-20, 30, // targetX, targetY
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		1, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	swingMoveToPositionBackwardsPD(0, 0, // targetX, targetY
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		1, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	moveToPositionPD(-10, 6, // targetX, targetY
 		50, 0, 90, //pGainTurn, dGainTurn, turnMaxVelocity
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		1, 0, 1); // pGainCorrection, dGainCorrection, maxCorrection
+		1, 0, 1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
 
 	turnToHeadingPD(degToRad(90),50, 0, 90);
 
@@ -195,8 +239,8 @@ void autonomous() {
 		case RED_UNPROT_9:
 			redUnprot9();
 			break;
-		case BLUE_UNPROT_9:
-			blueUnprot9();
+		case BLUE_UNPROT_6:
+			blueUnprot6();
 			break;
 		case RED_PROT_5:
 			redProt5();
