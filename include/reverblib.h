@@ -246,24 +246,34 @@ static void moveChassisVelocityTime(std::int32_t velocity, uint32_t time) {
     brakeChassis(MOTOR_BRAKE_BRAKE);
 }
 
-static void moveChassisRightRelative(double position, std::int32_t velocity) {
+static void moveChassisRightRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
     chassisRightFront.move_relative(position, velocity);
     chassisRightBack.move_relative(position, velocity);
+	if(waitTillCompletion){
+		while (!((chassisRightBack.get_position() < position+5) && (chassisRightBack.get_position() > position-5))) {
+		    pros::delay(2);
+		  }
+	}
 }
 
-static void moveChassisLeftRelative(double position, std::int32_t velocity) {
+static void moveChassisLeftRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
     chassisLeftFront.move_relative(position, velocity);
     chassisLeftBack.move_relative(position, velocity);
+	if(waitTillCompletion){
+		while (!((chassisLeftBack.get_position() < position+5) && (chassisLeftBack.get_position() > position-5))) {
+		    pros::delay(2);
+		  }
+	}
 }
 
-static void moveChassisRelative(double position, std::int32_t velocity) {
-    moveChassisRightRelative(position, velocity);
-    moveChassisLeftRelative(position, velocity);
+static void moveChassisRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
+    moveChassisRightRelative(position, velocity, false);
+    moveChassisLeftRelative(position, velocity, waitTillCompletion);
 }
 
-static void pointTurnRelative(double position, std::int32_t velocity) {
-	moveChassisLeftRelative(position, velocity);
-	moveChassisRightRelative(-position, velocity);
+static void pointTurnRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
+	moveChassisLeftRelative(position, velocity, false);
+	moveChassisRightRelative(-position, velocity, waitTillCompletion);
 }
 
 static void moveChassisRightAbsolute(double position, std::int32_t velocity) {

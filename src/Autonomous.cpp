@@ -74,6 +74,28 @@ void redUnprot5(){
 	stack();
 }
 
+void blueUnprot6(){
+	trayFlipOut();
+	delay(700);
+	runIntake();
+	moveChassisRelative(inchToDeg(35), 80, true);
+	pointTurnRelative(inchToDeg(1.5), 30, true);
+	moveChassisRelative(inchToDeg(10), 50, true);
+	moveChassisRelative(-inchToDeg(4), 50, true);
+	pointTurnRelative(-inchToDeg(1.5), 30, true);
+	moveChassisRelative(-inchToDeg(15), 80, true);
+	pointTurnRelative(-inchToDeg(11.5), 30, true);
+	setUpCubeFor5Stack();
+	moveChassisVelocityTime(80, 500);
+	delay(200);
+	stack();
+}
+
+void redUnprot9(){
+
+}
+
+
 void blueUnprot7(){
 	trayFlipOut();
 	delayWithOdom(600);
@@ -124,35 +146,6 @@ void blueUnprot7(){
 }
 
 void redUnprot7(){
-
-}
-
-void blueUnprot6(){
-	trayFlipOut();
-	delay(700);
-	runIntake();
-	moveChassisRelative(inchToDeg(35), 80);
-	delay(2000);
-	pointTurnRelative(inchToDeg(1.5), 30);
-	delay(500);
-	moveChassisRelative(inchToDeg(10), 50);
-	delay(1200);
-	moveChassisRelative(-inchToDeg(4), 50);
-	delay(500);
-	pointTurnRelative(-inchToDeg(1.5), 30);
-	delay(700);
-	moveChassisRelative(-inchToDeg(15), 80);
-	delay(1000);
-	pointTurnRelative(-inchToDeg(11.5), 30);
-	delay(2000);
-	setUpCubeFor5Stack();
-	delay(500);
-	moveChassisVelocityTime(80, 700);
-	delay(500);
-	stack();
-}
-
-void redUnprot9(){
 
 }
 
@@ -230,17 +223,17 @@ void autonomous() {
 		case BLUE_UNPROT_5:
 			blueUnprot5();
 			break;
-		case RED_UNPROT_7:
-			redUnprot7();
-			break;
-		case BLUE_UNPROT_7:
-			blueUnprot7();
-			break;
 		case RED_UNPROT_9:
 			redUnprot9();
 			break;
 		case BLUE_UNPROT_6:
 			blueUnprot6();
+			break;
+		case RED_UNPROT_7:
+			redUnprot7();
+			break;
+		case BLUE_UNPROT_7:
+			blueUnprot7();
 			break;
 		case RED_PROT_5:
 			redProt5();
