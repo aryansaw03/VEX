@@ -75,37 +75,90 @@ void redUnprot5(){
 }
 
 void blueUnprot6(){
+	// trayFlipOut();
+	// delay(1000);
+	// //moveChassisVelocityTime(-200, 300);
+	// runIntake();
+	// moveChassisRelative(inchToDeg(33), 70, true);
+	// pointTurnRelative(inchToDeg(1.5), 30, true);
+	// runIntakeVelocity(100);
+	// moveChassisRelative(inchToDeg(11), 50, true);
+	// moveChassisRelative(-inchToDeg(5), 50, true);
+	// pointTurnRelative(-inchToDeg(1.5), 50, true);
+	// moveChassisRelative(-inchToDeg(13), 100, true);
+	// pointTurnRelative(-inchToDeg(11.8), 50, true);
+	// setUpCubeFor5Stack();
+	// tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	// moveChassisVelocityTime(80, 700);
+	// delay(200);
+	// stack();
 	trayFlipOut();
-	delay(700);
+	delay(1000);
+	//moveChassisVelocityTime(-200, 300);
 	runIntake();
-	moveChassisRelative(inchToDeg(35), 80, true);
+	moveChassisRelative(inchToDeg(33.5), 70, true);
 	pointTurnRelative(inchToDeg(1.5), 30, true);
 	moveChassisRelative(inchToDeg(10), 50, true);
 	moveChassisRelative(-inchToDeg(4), 50, true);
-	pointTurnRelative(-inchToDeg(1.5), 30, true);
-	moveChassisRelative(-inchToDeg(15), 80, true);
-	pointTurnRelative(-inchToDeg(11.5), 30, true);
+	pointTurnRelative(-inchToDeg(1.5), 50, true);
+	moveChassisRelative(-inchToDeg(13.5), 100, true);
+	pointTurnRelative(-inchToDeg(11.8), 50, true);
 	setUpCubeFor5Stack();
-	moveChassisVelocityTime(80, 500);
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	moveChassisVelocityTime(80, 700);
 	delay(200);
 	stack();
+}
+
+void blueUnprot11() {
+	trayFlipOut();
+	delay(1000);
+	//moveChassisVelocityTime(-200, 300);
+	runIntake();
+	moveChassisRelative(inchToDeg(33.5), 70, true);
+	//delay(1000);
+	moveChassisRelative(-inchToDeg(20.5), 70, true);
+	//delay(1000);
+	pointTurnRelative(-inchToDeg(11.8), 50, true);
+	setUpCubeFor5Stack();
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	moveChassisVelocityTime(80, 700);
+	delay(200);
+	stack5();
 }
 
 void redUnprot9(){
 
 }
 
-
-void blueUnprot7(){
+void blueUnprot7New(){
 	trayFlipOut();
 	delayWithOdom(600);
 
 	runIntake();
 	delay(50);
 
+	swingMoveToPositionPD(0, 25.5, // targetX, targetY
+		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
+
+	swingMoveToPositionBackwardsPD(26.3, 9, // targetX, targetY
+		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 0.7, // pGainCorrection, dGainCorrection, maxCorrection
+		false); //exitOnPosSlope
+}
+
+void blueUnprot7(){
+	trayFlipOut();
+	delayWithOdom(400);
+
+	runIntake();
+	delay(50);
+
 	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
 	swingMoveToPositionPD(0, 37, // targetX, targetY
-		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), // pGainMove, dGainMove, moveMaxVelocity,
+		20, 0, ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER)-10, // pGainMove, dGainMove, moveMaxVelocity,
 		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
 		false); //exitOnPosSlope
 	delayWithOdom(100);
@@ -114,7 +167,7 @@ void blueUnprot7(){
 		0.3, 0, 0.7, // pGainCorrection, dGainCorrection, maxCorrection
 		false); //exitOnPosSlope
 
-	turnToHeadingPD(degToRad(95),50, 0, 90);
+	turnToHeadingPD(degToRad(90),50, 0, 90);
 
 	delay(100);
 	printf("%f\n", pos.x);
@@ -123,8 +176,8 @@ void blueUnprot7(){
 		0.4, 0, 0.5, // pGainCorrection, dGainCorrection, maxCorrection
 		true); //exitOnPosSlope
 
-	double cornerX = 0;
-	double cornerY = 17;
+	double cornerX = 1;
+	double cornerY = 18;
 	double heading = calcHeading(cornerX, cornerY);
 	turnToHeadingPD(heading+degToRad(0),40, 0, 130);
 
@@ -150,7 +203,43 @@ void redUnprot7(){
 }
 
 void blueProt5(){
+	theta = PI/4;
+	trayFlipOut();
+	delayWithOdom(600);
 
+	runIntakeVelocity(170);
+	delay(50);
+
+	swingMoveToPositionPD(20, 20, // targetX, targetY
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
+	moveToPositionPD(-2, 14.5, // targetX, targetY
+		60, 0, 110, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
+	swingMoveToPositionPD(-15, 13, // targetX, targetY
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.2, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
+	moveToPositionPD(16, 2, // targetX, targetY
+		55, 0, 110, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
+
+	setUpCubeFor5Stack();
+
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.7), 100);
+
+	turnToHeadingPD(degToRad(0),70, 0, 90);
+
+	moveForTimeOdom(80, 600);
+
+	//moveIntakeRelative(-50, 200);
+
+	stack5();
 }
 
 void redProt5(){
@@ -158,18 +247,21 @@ void redProt5(){
 }
 
 void testAuton(){
-	trayFlipOut();
-	return;
-	trayFlipOutMove();
-	delayWithOdom(500);
 
-	runIntake();
-	delay(50);
-	swingMoveToPositionPD(0, 40, // targetX, targetY
-		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+	swingMoveToPositionBackwardsPD(20, -20, // targetX, targetY
+		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 0.7, // pGainCorrection, dGainCorrection, maxCorrection
 		false); //exitOnPosSlope
-	printf("X: %f  Y: %f  Heading: %f \n", pos.x, pos.y, radToDeg(theta));
+
+	turnToHeadingPD(degToRad(90),50, 0, 90);
+
+	//delay(100);
+	printf("%f\n", pos.x);
+	moveForTimeOdom(20, 100);
+	swingMoveToPositionPD(pos.x, 20, // targetX, targetY
+		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
+		0.4, 0, 0.5, // pGainCorrection, dGainCorrection, maxCorrection
+		true); //exitOnPosSlope
 }
 
 void exampleMethods(){
@@ -210,9 +302,13 @@ void exampleMethods(){
  */
 
 void autonomous() {
+	trayBrake(MOTOR_BRAKE_COAST);
 	// testAuton();
+	//return;
+
+	// blueUnprot11();
 	// return;
-	autonomousType = BLUE_UNPROT_7;
+	autonomousType = BLUE_PROT_5;
 	switch (autonomousType) {
 		case -1:
 			trayFlipOut();

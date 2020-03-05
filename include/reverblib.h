@@ -249,20 +249,24 @@ static void moveChassisVelocityTime(std::int32_t velocity, uint32_t time) {
 static void moveChassisRightRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
     chassisRightFront.move_relative(position, velocity);
     chassisRightBack.move_relative(position, velocity);
+	double targetPosition = chassisRightBack.get_position() + position;
 	if(waitTillCompletion){
-		while (!((chassisRightBack.get_position() < position+5) && (chassisRightBack.get_position() > position-5))) {
+		while (!((chassisRightBack.get_position() < targetPosition+5) && (chassisRightBack.get_position() > targetPosition-5))) {
 		    pros::delay(2);
 		  }
+		  delay(50);
 	}
 }
 
 static void moveChassisLeftRelative(double position, std::int32_t velocity, bool waitTillCompletion) {
     chassisLeftFront.move_relative(position, velocity);
     chassisLeftBack.move_relative(position, velocity);
+	double targetPosition = chassisLeftBack.get_position() + position;
 	if(waitTillCompletion){
-		while (!((chassisLeftBack.get_position() < position+5) && (chassisLeftBack.get_position() > position-5))) {
+		while (!((chassisLeftBack.get_position() < targetPosition+5) && (chassisLeftBack.get_position() > targetPosition-5))) {
 		    pros::delay(2);
 		  }
+		  delay(50);
 	}
 }
 
@@ -488,6 +492,16 @@ static double delayWithOdom(double time){
 	}
 }
 
+static void moveForTimeOdom(double velocity, double time){
+	moveChassisVelocity(velocity);
+	delayWithOdom(time);
+	brakeChassis(MOTOR_BRAKE_BRAKE);
+}
+
+static void engageWheels(){
+	moveForTimeOdom(20, 100);
+}
+
 static void swingTurnToHeadingPD(double targetHeading, double pGainMove, double dGainMove, double moveMaxVelocity, double pGainCorrection, double dGainCorrection, double maxCorrection){
 
 	double prevHeadingError = 0;
@@ -599,6 +613,8 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 	vec2d desiredPos(targetX,targetY);
 	double heading = calcHeading(targetX, targetY);
 
+	engageWheels();
+
 	double prevHeadingError = 0;
     double headingError = 0;
 
@@ -667,7 +683,7 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 		}
 		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f Vel: %f rawCorrection: %f  correction: %f\n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), rawMoveVelocity, rawCorrection, correction);
 		//exit condition
-		if (std::abs(locationError) < 1.5 || (exitOnPosSlope && locationSlope>0.03 && std::abs(locationError) < 3)) { //  && std::abs(locationSlope) < .1
+		if (std::abs(locationError) < 1 || (exitOnPosSlope && locationSlope>0.03 && std::abs(locationError) < 3)) { //  && std::abs(locationSlope) < .1
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
         }
@@ -686,6 +702,8 @@ static void swingMoveToPositionPD(double targetX, double targetY, double pGainMo
 static void swingMoveToPositionBackwardsPD(double targetX, double targetY, double pGainMove, double dGainMove, double moveMaxVelocity, double pGainCorrection, double dGainCorrection, double maxCorrection, bool exitOnPosSlope){
 	vec2d desiredPos(targetX,targetY);
 	double heading = calcHeading(targetX, targetY) - PI;
+
+	engageWheels();
 
 	double prevHeadingError = 0;
     double headingError = 0;
@@ -755,7 +773,7 @@ static void swingMoveToPositionBackwardsPD(double targetX, double targetY, doubl
 		}
 		printf("X: %f  Y: %f  Heading: %f  desiredHeading: %f Vel: %f rawCorrection: %f  correction: %f\n", pos.x, pos.y, radToDeg(theta), radToDeg(heading), rawMoveVelocity, rawCorrection, correction);
 		//exit condition
-		if (std::abs(locationError) < 1.5 || (exitOnPosSlope && locationSlope>0.03 && std::abs(locationError) < 3)) { //  && std::abs(locationSlope) < .1
+		if (std::abs(locationError) < 1 || (exitOnPosSlope && locationSlope>0.03 && std::abs(locationError) < 3)) { //  && std::abs(locationSlope) < .1
             brakeChassis(MOTOR_BRAKE_BRAKE);
             return;
         }
@@ -779,12 +797,6 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 	swingMoveToPositionPD(targetX, targetY, pGainMove, dGainMove, moveMaxVelocity, pGainCorrection, dGainCorrection, maxCorrection, exitOnPosSlope);
 }
 
-static void moveForTimeOdom(double velocity, double time){
-	moveChassisVelocity(velocity);
-	delayWithOdom(time);
-	brakeChassis(MOTOR_BRAKE_BRAKE);
-}
-
 //auton
 
 static void moveOut(){
@@ -799,7 +811,7 @@ static void moveOut(){
 }
 
 static void setUpCubeFor5Stack(){
-	moveIntakeRelative(-195, 100);
+	moveIntakeRelative(-205, 100);
 }
 
 static void setUpCubeFor7Stack(){
@@ -852,6 +864,13 @@ static void moveTrayForward() {
 }
 
 static void stack(){
+	moveTrayForward();
+	//moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
+	delay(200);
+	moveOut();
+}
+
+static void stack5(){
 	moveTrayForward();
 	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
 	delay(200);

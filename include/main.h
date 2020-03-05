@@ -6,7 +6,7 @@
 #define LIFT 2
 #define TRAY 20
 #define INTAKE_LEFT 1
-#define INTAKE_RIGHT 10
+#define INTAKE_RIGHT 7
 /**
  * \file main.h
  *

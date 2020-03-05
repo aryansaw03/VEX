@@ -23,6 +23,7 @@ void opcontrol(){
 	int count = 0;
 	int intakeToggleCycles = 0;
 	int intakeReverseVelocityToggleCycles = 0;
+	int liftToggleCycles = 0;
 	bool fastReverse = false;
 	bool intakeForward = false;
 	bool intakeBackward = false;
@@ -30,6 +31,7 @@ void opcontrol(){
 	double prevTrayError = 0;
 	bool stackSetUp = false;
 	double prevIntakeLeftPosition = -1;
+	bool liftUp = false;
 
 	while (true){
 		//testing
@@ -200,17 +202,18 @@ void opcontrol(){
 		//====//
 		//Lift//
 		//====//
-		if(buttonUp){
-			moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
+		if(buttonRight && liftToggleCycles > 20){
+			liftUp = !liftUp;
+			liftToggleCycles = 0;
 		}
-		else if(buttonDown){
+		if(liftUp){
 			moveLiftAbsolute(LIFT_DOWN_POSITION, getMaxVelocity(lift));
 		}
 		else{
-			liftBrake(MOTOR_BRAKE_HOLD);
+			moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
 		}
+		liftToggleCycles++;
 		//====End Lift====//
-
 		count++;
 		pros::delay(20);
 	}
