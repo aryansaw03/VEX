@@ -23,8 +23,9 @@ void opcontrol(){
 	int count = 0;
 	int intakeToggleCycles = 0;
 	int intakeReverseVelocityToggleCycles = 0;
-	int liftToggleCycles = 0;
-	bool fastReverse = false;
+	int liftBRToggleCycles = 0;
+	int liftBYToggleCycles = 0;
+	bool slowReverse = false;
 	bool intakeForward = false;
 	bool intakeBackward = false;
 	bool movingTrayBackward = false;
@@ -32,6 +33,7 @@ void opcontrol(){
 	bool stackSetUp = false;
 	double prevIntakeLeftPosition = -1;
 	bool liftUp = false;
+	int liftHeight = -1;
 
 	while (true){
 		//testing
@@ -112,6 +114,7 @@ void opcontrol(){
 		//====//
 		if(buttonL2 && !movingTrayBackward){
 			movingTrayBackward = true;
+			prevIntakeLeftPosition = -1;
 			intakeBrake(MOTOR_BRAKE_HOLD);
 		}
 		if(buttonL1){
@@ -167,13 +170,19 @@ void opcontrol(){
 			runIntake();
 		}
 		else if(intakeBackward){
-			if(fastReverse){
-				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_FAST_VELOCITY_PERCENT);
-			}
-			else{
+			if(slowReverse){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
+			else{
+				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_FAST_VELOCITY_PERCENT);
+			}
 		}
+		// else if(buttonL1){
+		// 	if(prevIntakeLeftPosition == -1){
+		// 		prevIntakeLeftPosition = intakeLeft.get_position();
+		// 	}
+		// 	moveIntakeAbsolute(prevIntakeLeftPosition-70, getMaxVelocity(intakeLeft));
+		// }
 		else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-500){
 			intakeBrake(MOTOR_BRAKE_COAST);
 			//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
@@ -202,17 +211,31 @@ void opcontrol(){
 		//====//
 		//Lift//
 		//====//
-		if(buttonRight && liftToggleCycles > 20){
+		if(buttonRight && liftBRToggleCycles > 20){
 			liftUp = !liftUp;
-			liftToggleCycles = 0;
+			liftHeight = 1;
+			liftBRToggleCycles = 0;
+		}
+		if(buttonY && liftBYToggleCycles > 20){
+			liftUp = !liftUp;
+			liftHeight = 2;
+			liftBYToggleCycles = 0;
 		}
 		if(liftUp){
-			moveLiftAbsolute(LIFT_DOWN_POSITION, getMaxVelocity(lift));
+			slowReverse = true;
+			if(liftHeight == 1){
+				moveLiftAbsolute(350, getMaxVelocity(lift));
+			}
+			else{
+				moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
+			}
 		}
 		else{
-			moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
+			slowReverse = false;
+			moveLiftAbsolute(LIFT_DOWN_POSITION, getMaxVelocity(lift));
 		}
-		liftToggleCycles++;
+		liftBRToggleCycles++;
+		liftBYToggleCycles++;
 		//====End Lift====//
 		count++;
 		pros::delay(20);
