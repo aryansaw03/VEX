@@ -22,9 +22,11 @@ void opcontrol(){
 	//=========//
 	int count = 0;
 	int intakeToggleCycles = 0;
-	int intakeReverseVelocityToggleCycles = 0;
-	int liftToggleCycles = 0;
-	bool fastReverse = false;
+	int intakeVelocityToggleCycles = 0;
+	int liftBRToggleCycles = 0;
+	int liftBYToggleCycles = 0;
+	bool slowReverse = false;
+	bool slowIntake = false;
 	bool intakeForward = false;
 	bool intakeBackward = false;
 	bool movingTrayBackward = false;
@@ -32,6 +34,7 @@ void opcontrol(){
 	bool stackSetUp = false;
 	double prevIntakeLeftPosition = -1;
 	bool liftUp = false;
+	int liftHeight = -1;
 
 	while (true){
 		//testing
@@ -112,6 +115,7 @@ void opcontrol(){
 		//====//
 		if(buttonL2 && !movingTrayBackward){
 			movingTrayBackward = true;
+			prevIntakeLeftPosition = -1;
 			intakeBrake(MOTOR_BRAKE_HOLD);
 		}
 		if(buttonL1){
@@ -147,6 +151,10 @@ void opcontrol(){
 		//======//
 		//Intake//
 		//======//
+		if(buttonA && intakeVelocityToggleCycles>20){
+			slowIntake = !slowIntake;
+			intakeVelocityToggleCycles = 0;
+		}
 		if(buttonR1 && intakeToggleCycles>20) { //Toggle roller intake
 			intakeBackward = false;
 			intakeForward = !intakeForward;
@@ -156,63 +164,74 @@ void opcontrol(){
 			intakeForward = false;
 			intakeBackward = true;
 		}
-		else if(buttonA){
-			stackSetUp = true;
-		}
 		else{
 			intakeBackward = false;
 		}
-
 		if(intakeForward){
-			runIntake();
-		}
-		else if(intakeBackward){
-			if(fastReverse){
-				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_FAST_VELOCITY_PERCENT);
+			if(slowIntake){
+				runIntakeVelocity(getMaxVelocity(intakeLeft)*INTAKE_SLOW_VELOCITY_PERCENT);
 			}
 			else{
+				runIntake();
+			}
+		}
+		else if(intakeBackward){
+			if(slowReverse){
 				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_SLOW_VELOCITY_PERCENT);
 			}
+			else{
+				runIntakeVelocity(-getMaxVelocity(intakeRight)*INTAKE_REVERSE_FAST_VELOCITY_PERCENT);
+			}
 		}
-		else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-500){
-			intakeBrake(MOTOR_BRAKE_COAST);
-			//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
-		}
+		// else if(buttonL1){
+		// 	if(prevIntakeLeftPosition == -1){
+		// 		prevIntakeLeftPosition = intakeLeft.get_position();
+		// 	}
+		// 	moveIntakeAbsolute(prevIntakeLeftPosition-70, getMaxVelocity(intakeLeft));
+		// }
+		// else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-900){
+		// 	intakeBrake(MOTOR_BRAKE_COAST);
+		// 	//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
+		// }
 		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			runIntakeVelocity(-getMaxVelocity(intakeLeft));
-		}
-		else if(stackSetUp){
-			if(prevIntakeLeftPosition == -1){
-				prevIntakeLeftPosition = intakeLeft.get_position();
-			}
-			moveIntakeRelative(prevIntakeLeftPosition-50, getMaxVelocity(intakeLeft));
-			if(intakeLeft.get_position() <= prevIntakeLeftPosition-48){
-				prevIntakeLeftPosition = -1;
-				stackSetUp = false;
-			}
 		}
 		else{
 			intakeBrake(MOTOR_BRAKE_HOLD);
 		}
 		intakeToggleCycles++;
-		intakeReverseVelocityToggleCycles++;
+		intakeVelocityToggleCycles++;
 		//====End Intake====//
 
 
 		//====//
 		//Lift//
 		//====//
-		if(buttonRight && liftToggleCycles > 20){
+		if(buttonRight && liftBRToggleCycles > 20){
 			liftUp = !liftUp;
-			liftToggleCycles = 0;
+			liftHeight = 1;
+			liftBRToggleCycles = 0;
+		}
+		if(buttonY && liftBYToggleCycles > 20){
+			liftUp = !liftUp;
+			liftHeight = 2;
+			liftBYToggleCycles = 0;
 		}
 		if(liftUp){
-			moveLiftAbsolute(LIFT_DOWN_POSITION, getMaxVelocity(lift));
+			slowReverse = true;
+			if(liftHeight == 1){
+				moveLiftAbsolute(330, getMaxVelocity(lift));
+			}
+			else{
+				moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
+			}
 		}
 		else{
-			moveLiftAbsolute(LIFT_UP_POSITION, getMaxVelocity(lift));
+			slowReverse = false;
+			moveLiftAbsolute(LIFT_DOWN_POSITION, getMaxVelocity(lift));
 		}
-		liftToggleCycles++;
+		liftBRToggleCycles++;
+		liftBYToggleCycles++;
 		//====End Lift====//
 		count++;
 		pros::delay(20);
