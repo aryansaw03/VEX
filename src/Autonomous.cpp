@@ -219,9 +219,10 @@ void blueProt5(){
 		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
 		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
 		true); //exitOnPosSlope
-	swingMoveToPositionPD(-15, 13, // targetX, targetY
-		20, 0, 100, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+	moveToPositionPD(-14, 13, // targetX, targetY
+		60, 0, 110, //pGainTurn, dGainTurn, turnMaxVelocity
+		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
+		0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
 		true); //exitOnPosSlope
 	moveToPositionPD(16, 2, // targetX, targetY
 		55, 0, 110, //pGainTurn, dGainTurn, turnMaxVelocity
