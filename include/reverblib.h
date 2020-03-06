@@ -815,6 +815,10 @@ static void setUpCubeFor5Stack(){
 	moveIntakeRelative(-205, 100);
 }
 
+static void setUpCubeFor4Stack(){
+	moveIntakeRelative(-205, 100);
+}
+
 static void setUpCubeFor7Stack(){
 	moveIntakeRelative(-180, 100);
 }
