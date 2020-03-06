@@ -46,7 +46,7 @@ static const double TRAY_DOWN_VELOCITY_PERCENT = 0.6;
 //Intake
 static const double INTAKE_REVERSE_SLOW_VELOCITY_PERCENT = 0.4;
 static const double INTAKE_REVERSE_FAST_VELOCITY_PERCENT = 0.6;
-static const double INTAKE_SLOW_VELOCITY_PERCENT = 0.5;
+static const double INTAKE_SLOW_VELOCITY_PERCENT = 0.75;
 static const double SPROCKET_DIAMETER = 2.0;
 
 //Lift
