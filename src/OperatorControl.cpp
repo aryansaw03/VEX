@@ -189,10 +189,10 @@ void opcontrol(){
 		// 	}
 		// 	moveIntakeAbsolute(prevIntakeLeftPosition-70, getMaxVelocity(intakeLeft));
 		// }
-		// else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-900){
-		// 	intakeBrake(MOTOR_BRAKE_COAST);
-		// 	//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
-		// }
+		else if(buttonL1 && tray.get_position() > TRAY_FORWARD_POSITION-500){
+			intakeBrake(MOTOR_BRAKE_COAST);
+			//moveIntakeRelative(-70, getMaxVelocity(intakeLeft));
+		}
 		else if(buttonL2 && tray.get_position() < TRAY_FORWARD_POSITION-100){
 			runIntakeVelocity(-getMaxVelocity(intakeLeft));
 		}
