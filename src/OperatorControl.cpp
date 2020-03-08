@@ -118,7 +118,10 @@ void opcontrol(){
 			prevIntakeLeftPosition = -1;
 			intakeBrake(MOTOR_BRAKE_HOLD);
 		}
-		if(buttonL1){
+		if(buttonUp){
+			moveTrayVelocity(20);
+		}
+		else if(buttonL1){
 			double trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
 	        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
 	        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
@@ -233,6 +236,12 @@ void opcontrol(){
 		liftBRToggleCycles++;
 		liftBYToggleCycles++;
 		//====End Lift====//
+
+		if(buttonLeft){
+			trayFlipOut();
+		}
+
+
 		count++;
 		pros::delay(20);
 	}

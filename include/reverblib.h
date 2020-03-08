@@ -28,8 +28,8 @@ static const int BLUE_UNPROT_7 = 2;
 static const int RED_UNPROT_7 = 3;
 static const int BLUE_UNPROT_6 = 4;
 static const int RED_UNPROT_9 = 5;
-static const int BLUE_PROT_5 = 6;
-static const int RED_PROT_5 = 7;
+static const int BLUE_PROT_4 = 6;
+static const int RED_PROT_4 = 7;
 static const int ALL_SIDES_1 = 8;
 static const int NUM_OF_AUTONOMI = 9;
 
@@ -803,12 +803,9 @@ static void moveToPositionPD(double targetX, double targetY, double pGainTurn, d
 static void moveOut(){
 	moveTrayAbsolute(TRAY_BACK_POSITION, getMaxVelocity(tray));
 	delay(200);
-	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft), SPROCKET_DIAMETER);
-	runIntakeVelocity(-getMaxVelocity(intakeLeft));
-	moveChassisVelocity(-ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER));
-	delay(1000);
-	runIntakeVelocity(0);
-	brakeChassis(MOTOR_BRAKE_BRAKE);
+	int maxIntakeIPM = rpmToIPM(getMaxVelocity(intakeLeft)*.7, SPROCKET_DIAMETER);
+	runIntakeVelocity(-getMaxVelocity(intakeLeft)*.7);
+	moveChassisRelative(-inchToDeg(21), ipmToRPM(maxIntakeIPM, WHEEL_DIAMETER), true);
 }
 
 static void setUpCubeFor5Stack(){
@@ -826,10 +823,12 @@ static void setUpCubeFor7Stack(){
 static void trayFlipOut() {
     runIntakeVelocity(-getMaxVelocity(intakeRight));
 	lift.move_absolute(250, 200);
-    delayWithOdom(700);
+    //delayWithOdom(700);
+	moveChassisVelocityTime(-40, 700);
 	lift.move_absolute(0, 200);
     intakeBrake(MOTOR_BRAKE_HOLD);
-	delayWithOdom(500);
+	//delayWithOdom(500);
+	moveChassisVelocityTime(-40, 500);
 }
 
 static void trayFlipOutMove() {
@@ -859,9 +858,30 @@ static void moveTrayForward() {
             return;
         }
         moveTrayVelocity(trayVel);
-
 		if(tray.get_position() > TRAY_FORWARD_POSITION-500){
 			intakeBrake(MOTOR_BRAKE_COAST);
+			runIntakeVelocity(-20);
+		}
+
+        delay(DELAY_MS);
+    }
+}
+
+static void moveTrayForward4() {
+    double trayError = 0;
+    while (true) {
+        trayError = TRAY_FORWARD_POSITION - tray.get_position(); //Calculate Proportional
+        double rawTrayVel = 0.13 * trayError; //Calculate raw velocity
+        double trayVel = (rawTrayVel > getMaxVelocity(tray)) ? getMaxVelocity(tray) : rawTrayVel; //Cap velocity
+		trayVel = (trayVel < 50) ? 50 : trayVel;
+        if (trayError < 1) { //if error less than .2 exit
+            trayBrake(MOTOR_BRAKE_HOLD);
+            return;
+        }
+        moveTrayVelocity(trayVel);
+		if(tray.get_position() > TRAY_FORWARD_POSITION-500){
+			intakeBrake(MOTOR_BRAKE_COAST);
+			runIntakeVelocity(-20);
 		}
 
         delay(DELAY_MS);
@@ -877,6 +897,13 @@ static void stack(){
 
 static void stack5(){
 	moveTrayForward();
+	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
+	delay(200);
+	moveOut();
+}
+
+static void stack4(){
+	moveTrayForward4();
 	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
 	delay(200);
 	moveOut();

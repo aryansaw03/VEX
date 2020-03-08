@@ -7,24 +7,41 @@ void allSide1(){
 }
 
 void blueUnprot5(){
+	brakeChassis(MOTOR_BRAKE_HOLD);
 	trayFlipOut();
-	delay(1000);
-	//moveChassisVelocityTime(-200, 300);
-	runIntake();
-	moveChassisRelative(inchToDeg(33.5), 70, true);
+	delay(500);
+	moveChassisVelocityTime(-70, 500);
+	runIntakeVelocity(getMaxVelocity(intakeLeft)*0.75);
+	moveChassisRelative(inchToDeg(33.5), 60, true);
 	//delay(1000);
-	moveChassisRelative(-inchToDeg(20.5), 70, true);
+	moveChassisRelative(-inchToDeg(18.5), 70, true);
 	//delay(1000);
-	pointTurnRelative(-inchToDeg(11.8), 50, true);
+	pointTurnRelative(-inchToDeg(11), 40, true);
 	setUpCubeFor5Stack();
 	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
-	moveChassisVelocityTime(80, 700);
+	moveChassisVelocityTime(80, 900);
 	delay(200);
+	//moveIntakeRelative(-50, getMaxVelocity(intakeLeft));
 	stack5();
 }
 
 void redUnprot5(){
-
+	brakeChassis(MOTOR_BRAKE_HOLD);
+	trayFlipOut();
+	delay(500);
+	moveChassisVelocityTime(-70, 500);
+	runIntakeVelocity(getMaxVelocity(intakeLeft)*0.75);
+	moveChassisRelative(inchToDeg(33.5), 60, true);
+	//delay(1000);
+	moveChassisRelative(-inchToDeg(18.5), 70, true);
+	//delay(1000);
+	pointTurnRelative(inchToDeg(10.5), 40, true);
+	setUpCubeFor5Stack();
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	moveChassisVelocityTime(80, 900);
+	delay(200);
+	//moveIntakeRelative(-50, getMaxVelocity(intakeLeft));
+	stack5();
 }
 
 void blueUnprot6(){
@@ -45,24 +62,7 @@ void blueUnprot6(){
 	stack();
 }
 
-void blueUnprot11() {
-	trayFlipOut();
-	delay(1000);
-	//moveChassisVelocityTime(-200, 300);
-	runIntake();
-	moveChassisRelative(inchToDeg(33.5), 70, true);
-	//delay(1000);
-	moveChassisRelative(-inchToDeg(20.5), 70, true);
-	//delay(1000);
-	pointTurnRelative(-inchToDeg(11.8), 50, true);
-	setUpCubeFor5Stack();
-	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
-	moveChassisVelocityTime(80, 700);
-	delay(200);
-	stack5();
-}
-
-void redUnprot9(){
+void redUnprot6(){
 
 }
 
@@ -112,57 +112,147 @@ void redUnprot7(){
 
 }
 
-void blueProt5(){
-	theta = PI/4;
+void blueProt4Old(){
+	brakeChassis(MOTOR_BRAKE_HOLD);
 	trayFlipOut();
-	delayWithOdom(600);
-
-	runIntakeVelocity(200);
-	delay(50);
-
-	swingMoveToPositionPD(17, 17, // targetX, targetY
-		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
-		true); //exitOnPosSlope
-	moveToPositionPD(-2, 13.2, // targetX, targetY
-		60, 0, 150, //pGainTurn, dGainTurn, turnMaxVelocity
-		20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
-		true); //exitOnPosSlope
-	runIntakeVelocity(120);
-	moveToPositionPD(-14, 11, // targetX, targetY
-		75, 0, 150, //pGainTurn, dGainTurn, turnMaxVelocity
-		20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
-		0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
-		true); //exitOnPosSlope
-
-	delayWithOdom(200);
-
-	double cornerX = 16;
-	double cornerY = 2;
-	double heading = calcHeading(cornerX, cornerY);
-	turnToHeadingPD(heading+degToRad(0),55, 0, 110);
-
+	delay(800);
+	runIntakeVelocity(getMaxVelocity(intakeLeft));
+	moveChassisRelative(inchToDeg(27), 80, true); //first cube
+	pointTurnRelative(-inchToDeg(14.5), 50, true); //turn to second
+	moveChassisRelative(inchToDeg(18), 70, true); //second cube
+	pointTurnRelative(-inchToDeg(3.5), 50, true); //turn to third
+	moveChassisRelative(inchToDeg(9), 70, true); //gets 3
+	moveChassisRelative(-inchToDeg(10), 100, true); //backs up
 	setUpCubeFor4Stack();
-	tray.move_relative((int)(TRAY_FORWARD_POSITION*.7), 100);
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.6), 100);
+	pointTurnRelative(-inchToDeg(16.2), 50, true); //turns to zone
+	moveChassisVelocityTime(60, 1300); //moves to zone
+	//moveChassisRelative(inchToDeg(18), 70, true);
+	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
+	stack5();
 
-	swingMoveToPositionPD(cornerX, cornerY, // targetX, targetY
-		15, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
-		0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
-		true); //exitOnPosSlope
 
-	//delayWithOdom(200);
-	turnToHeadingPD(degToRad(0),70, 0, 90);
+	// pointTurnRelative(-inchToDeg(11.8), 50, true);
+	// setUpCubeFor5Stack();
+	// tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	// moveChassisVelocityTime(80, 700);
+	// delay(200);
+	// moveIntakeRelative(-50, getMaxVelocity(intakeLeft));
+	// stack5();
+	// Odom
+	// theta = PI/4;
+	// trayFlipOut();
+	// delayWithOdom(600);
+	//
+	// runIntakeVelocity(200);
+	// delay(50);
+	//
+	// swingMoveToPositionPD(18, 18, // targetX, targetY
+	// 	20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	0.2, 0, 0.1, // pGainCorrection, dGainCorrection, maxCorrection
+	// 	true); //exitOnPosSlope
+	// moveToPositionPD(-1, 18.2, // targetX, targetY
+	// 	55, 0, 150, //pGainTurn, dGainTurn, turnMaxVelocity
+	// 	20, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	0.2, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+	// 	true); //exitOnPosSlope
+	// runIntakeVelocity(120);
+	// moveToPositionPD(-9, 17, // targetX, targetY
+	// 	75, 0, 150, //pGainTurn, dGainTurn, turnMaxVelocity
+	// 	20, 0, 80, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+	// 	true); //exitOnPosSlope
+	//
+	// delayWithOdom(100);
+	// moveForTimeOdom(-80, 200);
+	// double cornerX = 15;
+	// double cornerY = 3;
+	// double heading = calcHeading(cornerX, cornerY);
+	// turnToHeadingPD(heading+degToRad(0),55, 0, 110);
+	//
+	// setUpCubeFor4Stack();
+	// tray.move_relative((int)(TRAY_FORWARD_POSITION*.7), 100);
+	//
+	// swingMoveToPositionPD(cornerX, cornerY, // targetX, targetY
+	// 	15, 0, 130, // pGainMove, dGainMove, moveMaxVelocity,
+	// 	0.3, 0, 0.2, // pGainCorrection, dGainCorrection, maxCorrection
+	// 	true); //exitOnPosSlope
+	//
+	// //delayWithOdom(200);
+	// turnToHeadingPD(degToRad(0),70, 0, 90);
+	//
+	// moveForTimeOdom(80, 600);
+	//
+	// moveIntakeRelative(-70, 200);
+	//
+	// stack5();
+}
 
-	moveForTimeOdom(80, 600);
+void blueProt4(){
 
-	moveIntakeRelative(-50, 200);
+}
 
+void redProt4(){
+	trayFlipOut();
+	delay(700);
+	runIntakeVelocity(getMaxVelocity(intakeLeft)*0.65);
+	moveChassisRelative(inchToDeg(4), 30, true); //go away from wall
+	delay(300);
+	pointTurnRelative(inchToDeg(3.8), 60, true); // turn to 1
+	delay(100);
+	moveChassisRelative(inchToDeg(14), 70, true); //move to 1
+	delay(100);
+	pointTurnRelative(inchToDeg(3.4), 60, true); //turn to 2
+	delay(300);
+	moveChassisRelative(inchToDeg(5.9), 70, true);//move to 2
+	delay(400);
+	//moveChassisRelative(-inchToDeg(2), 60, true);
+	pointTurnRelative(-inchToDeg(13.2), 50, true); // turn to 3
+	runIntakeVelocity(getMaxVelocity(intakeLeft)*0.50);
+	moveChassisRelative(inchToDeg(17), 70, true); // move to 3
+	delay(100);
+	pointTurnRelative(-inchToDeg(4.4), 60, true);
+	setUpCubeFor4Stack();
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.6), 100);
+	delay(100);
+	moveChassisVelocityTime(80, 500);
+	moveIntakeRelative(-40, getMaxVelocity(intakeLeft));
 	stack5();
 }
 
-void redProt5(){
-
+void skills() {
+	brakeChassis(MOTOR_BRAKE_HOLD);
+	trayFlipOut();
+	delay(500);
+	moveChassisVelocityTime(-70, 500);
+	runIntakeVelocity(getMaxVelocity(intakeLeft)*0.75);
+	moveChassisRelative(inchToDeg(33.5), 60, true);
+	//delay(1000);
+	moveChassisRelative(-inchToDeg(18.5), 70, true);
+	//delay(1000);
+	pointTurnRelative(-inchToDeg(11), 40, true);
+	setUpCubeFor5Stack();
+	tray.move_relative((int)(TRAY_FORWARD_POSITION*.5), 100);
+	moveChassisVelocityTime(80, 900);
+	delay(200);
+	//moveIntakeRelative(-50, getMaxVelocity(intakeLeft));
+	stack5();
+	delay(500);
+	//moveChassisRelative(-inchToDeg(10), 60, true);
+	pointTurnRelative(inchToDeg(10), 40, true);
+	delay(500);
+	runIntake();
+	moveChassisRelative(inchToDeg(16), 60, true);
+	delay(500);
+	moveChassisRelative(-inchToDeg(5), 60, true);
+	moveIntakeRelative(-170, 50);
+	delay(600);
+	intakeBrake(MOTOR_BRAKE_HOLD);
+	moveLiftAbsolute(330, getMaxVelocity(lift));
+	delay(600);
+	moveChassisRelative(inchToDeg(8), 60, true);
+	delay(600);
+	runIntakeVelocity(-getMaxVelocity(intakeLeft)*0.5);
 }
 
 void testAuton(){
@@ -222,12 +312,12 @@ void exampleMethods(){
 
 void autonomous() {
 	trayBrake(MOTOR_BRAKE_COAST);
-	// testAuton();
-	//return;
-
-	// blueUnprot11();
+	// skills();
 	// return;
-	autonomousType = BLUE_PROT_5;
+	// testAuton();
+	//skills();
+	//return;
+	autonomousType = BLUE_UNPROT_5;
 	switch (autonomousType) {
 		case -1:
 			trayFlipOut();
@@ -239,7 +329,7 @@ void autonomous() {
 			blueUnprot5();
 			break;
 		case RED_UNPROT_9:
-			redUnprot9();
+			redUnprot6();
 			break;
 		case BLUE_UNPROT_6:
 			blueUnprot6();
@@ -250,11 +340,11 @@ void autonomous() {
 		case BLUE_UNPROT_7:
 			blueUnprot7();
 			break;
-		case RED_PROT_5:
-			redProt5();
+		case RED_PROT_4:
+			redProt4();
 			break;
-		case BLUE_PROT_5:
-			blueProt5();
+		case BLUE_PROT_4:
+			blueProt4();
 			break;
 
 	}
